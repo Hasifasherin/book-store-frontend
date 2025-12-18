@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { User, ShoppingBag, Search, Heart } from "lucide-react";
 import Link from "next/link";
+import AuthOverlay from "@/components/auth/AuthOverlay";
 
 export default function MainHeader() {
+  const [showAuth, setShowAuth] = useState(false);
+
   return (
     <div className="bg-[#4B2E2B] text-[#F5F1E9] px-6 py-15 flex items-center justify-between">
       
@@ -31,12 +35,16 @@ export default function MainHeader() {
 
       {/* Icons */}
       <div className="flex gap-5">
-        <Link href="/auth/signup">
-          <User className="cursor-pointer text-[#F5F1E9]" />
-        </Link>
+        <User
+          className="cursor-pointer text-[#F5F1E9]"
+          onClick={() => setShowAuth(true)}
+        />
         <ShoppingBag className="cursor-pointer text-[#F5F1E9]" />
         <Heart className="cursor-pointer text-[#F5F1E9]" />
       </div>
+
+      {/* Auth Overlay */}
+      {showAuth && <AuthOverlay onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

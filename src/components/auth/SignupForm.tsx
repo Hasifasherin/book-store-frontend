@@ -15,7 +15,11 @@ interface SignupFormState {
   confirmPassword: string;
 }
 
-export default function SignupForm() {
+interface Props {
+  onCancel: () => void;
+}
+
+export default function SignupForm({ onCancel }: Props) {
   const dispatch = useAppDispatch();
 
   const [form, setForm] = useState<SignupFormState>({
@@ -29,89 +33,135 @@ export default function SignupForm() {
     confirmPassword: ""
   });
 
+  const [errors, setErrors] = useState<Partial<SignupFormState>>({});
+
+  // ✅ Validation
+  const validate = () => {
+    const newErrors: Partial<SignupFormState> = {};
+
+    Object.entries(form).forEach(([key, value]) => {
+      if (!value) newErrors[key as keyof SignupFormState] = "Required";
+    });
+
+    if (
+      form.password &&
+      form.confirmPassword &&
+      form.password !== form.confirmPassword
+    ) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const submitHandler = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(signupUser(form));
+    if (!validate()) return;
+
+    dispatch(signupUser(form)); // 🔥 Backend call
   };
 
   return (
-    <form
-      onSubmit={submitHandler}
-      className="max-w-md mx-auto mt-10 space-y-3"
-    >
-      <input
-        className="w-full border p-2"
-        placeholder="First Name"
-        onChange={(e) =>
-          setForm({ ...form, firstName: e.target.value })
-        }
-      />
+    <form onSubmit={submitHandler} className="space-y-3 ">
+      {[
+        { key: "firstName", label: "First Name" },
+        { key: "lastName", label: "Last Name" },
+        { key: "email", label: "Email", type: "email" },
+        { key: "phone", label: "Phone" }
+      ].map(({ key, label, type }) => (
+        <div key={key}>
+          <input
+            type={type || "text"}
+            placeholder={label}
+            className="w-full border border-[#4B2E2B] p-2 rounded placeholder-[#4B2E2B] focus:ring-2 focus:ring-[#BF5A2E]"
+            onChange={(e) =>
+              setForm({ ...form, [key]: e.target.value })
+            }
+          />
+          {errors[key as keyof SignupFormState] && (
+            <p className="text-xs text-red-600">
+              {errors[key as keyof SignupFormState]}
+            </p>
+          )}
+        </div>
+      ))}
 
-      <input
-        className="w-full border p-2"
-        placeholder="Last Name"
-        onChange={(e) =>
-          setForm({ ...form, lastName: e.target.value })
-        }
-      />
+      {/* Gender */}
+      <div className="flex gap-3">
+        {["m", "f"].map((g) => (
+          <button
+            key={g}
+            type="button"
+            onClick={() => setForm({ ...form, gender: g })}
+            className={`flex-1 py-2 rounded border ${form.gender === g
+                ? "bg-[#BF5A2E] text-white border-[#BF5A2E]"
+                : "border-[#4B2E2B] text-[#4B2E2B]"
+              }`}
+          >
+            {g === "m" ? "Male" : "Female"}
+          </button>
+        ))}
+      </div>
+      {errors.gender && (
+        <p className="text-xs text-red-600">Required</p>
+      )}
 
-      <input
-        className="w-full border p-2"
-        type="email"
-        placeholder="Email"
-        onChange={(e) =>
-          setForm({ ...form, email: e.target.value })
-        }
-      />
+      <div>
+        <input
+          type="date"
+          className="w-full border border-[#4B2E2B] p-2 rounded 
+             text-[#4B2E2B] focus:text-[#4B2E2B]"
+          onChange={(e) => setForm({ ...form, dob: e.target.value })}
+        />
 
-      <input
-        className="w-full border p-2"
-        placeholder="Phone"
-        onChange={(e) =>
-          setForm({ ...form, phone: e.target.value })
-        }
-      />
+      </div>
 
-      <input
-        className="w-full border p-2"
-        placeholder="Gender (m/f)"
-        onChange={(e) =>
-          setForm({ ...form, gender: e.target.value })
-        }
-      />
+      <div>
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border border-[#4B2E2B] p-2 rounded placeholder-[#4B2E2B]"
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+        {errors.password && (
+          <p className="text-xs text-red-600">Required</p>
+        )}
+      </div>
 
-      <input
-        className="w-full border p-2"
-        type="date"
-        onChange={(e) =>
-          setForm({ ...form, dob: e.target.value })
-        }
-      />
+      <div>
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          className="w-full border border-[#4B2E2B] p-2 rounded placeholder-[#4B2E2B]"
+          onChange={(e) =>
+            setForm({ ...form, confirmPassword: e.target.value })
+          }
+        />
+        {errors.confirmPassword && (
+          <p className="text-xs text-red-600">
+            {errors.confirmPassword}
+          </p>
+        )}
+      </div>
 
-      <input
-        className="w-full border p-2"
-        type="password"
-        placeholder="Password"
-        onChange={(e) =>
-          setForm({ ...form, password: e.target.value })
-        }
-      />
+      {/* Actions */}
+      <div className="flex gap-3 pt-4">
+        <button
+          type="submit"
+          className="flex-1 bg-[#BF5A2E] text-white py-2 rounded font-semibold hover:bg-[#a3471f]"
+        >
+          Submit
+        </button>
 
-      <input
-        className="w-full border p-2"
-        type="password"
-        placeholder="Confirm Password"
-        onChange={(e) =>
-          setForm({ ...form, confirmPassword: e.target.value })
-        }
-      />
-
-      <button
-        type="submit"
-        className="bg-black text-white w-full py-2"
-      >
-        Sign Up
-      </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 border border-[#4B2E2B] text-[#4B2E2B] py-2 rounded"
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }
