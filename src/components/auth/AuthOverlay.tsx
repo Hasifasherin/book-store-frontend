@@ -22,7 +22,7 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
         className="bg-[#F5F1E9] w-full max-w-md rounded-xl shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 🔶 Card Header */}
+        {/*  Card Header */}
         <div
           className="bg-[#4B2E2B] text-white text-center px-4 pt-4 pb-10  rounded-b-[10%]"
           
@@ -39,7 +39,7 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
           </p>
         </div>
 
-        {/* 🔶 Card Body */}
+        {/* Card Body */}
         <div className="px-8 py-8 -mt-10 pt-13">
           {isSignup ? (
             <SignupForm onCancel={onClose} />

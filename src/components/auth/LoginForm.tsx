@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginUser } from "@/redux/slices/authSlice";
+import toast from "react-hot-toast";
 
 interface Props {
   onCancel: () => void;
@@ -10,76 +11,56 @@ interface Props {
 
 export default function LoginForm({ onCancel }: Props) {
   const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.auth);
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [errors, setErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
-
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!form.email) newErrors.email = "Required";
-    if (!form.password) newErrors.password = "Required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const submitHandler = (e: React.FormEvent) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validate()) return;
 
-    dispatch(loginUser(form)); // 🔥 backend auth
+    if (!email || !password) {
+      toast.error("Please fill all fields");
+      return;
+    }
+
+    try {
+      await dispatch(loginUser({ email, password })).unwrap();
+      toast.success("Login successful 🎉");
+      onCancel(); // close modal
+    } catch (error: any) {
+      toast.error(error || "Invalid email or password");
+    }
   };
-
-  const inputClass =
-    "w-full border border-[#4B2E2B] p-2 rounded placeholder-[#4B2E2B] focus:outline-none focus:ring-2 focus:ring-[#BF5A2E]";
 
   return (
     <form onSubmit={submitHandler} className="space-y-4">
       {/* Email */}
-      <div>
-        <input
-          type="email"
-          placeholder="Email"
-          className={inputClass}
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
-        {errors.email && (
-          <p className="text-xs text-red-600">{errors.email}</p>
-        )}
-      </div>
+      <input
+        type="email"
+        placeholder="Email"
+        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
       {/* Password */}
-      <div>
-        <input
-          type="password"
-          placeholder="Password"
-          className={inputClass}
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
-        {errors.password && (
-          <p className="text-xs text-red-600">{errors.password}</p>
-        )}
-      </div>
+      <input
+        type="password"
+        placeholder="Password"
+        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 bg-[#BF5A2E] text-white py-2 rounded font-semibold hover:bg-[#a3471f]"
+          disabled={loading}
+          className="flex-1 bg-[#BF5A2E] text-white py-2 rounded disabled:opacity-60"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <button
