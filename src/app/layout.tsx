@@ -2,8 +2,8 @@
 
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
-import Header from "@/components/header/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/header/Header";
+import Footer from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 

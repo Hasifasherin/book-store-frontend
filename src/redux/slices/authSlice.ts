@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { signupUserAPI, loginUserAPI } from "@/services/authService";
 
-interface User {
+export interface User {
   _id: string;
   firstName: string;
   lastName: string;
@@ -9,7 +9,7 @@ interface User {
   role: "admin" | "buyer" | "seller";
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   user: User;
   token: string;
 }
@@ -21,16 +21,26 @@ interface AuthState {
   error: string | null;
 }
 
+/* ✅ SAFE LOCALSTORAGE LOAD */
+const getUserFromStorage = (): User | null => {
+  if (typeof window === "undefined") return null;
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
+const getTokenFromStorage = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+};
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user: getUserFromStorage(),
+  token: getTokenFromStorage(),
   loading: false,
   error: null,
 };
 
-/* =======================
-   THUNKS
-======================= */
+/* ================== THUNKS ================== */
 
 export const signupUser = createAsyncThunk<
   AuthResponse,
@@ -56,9 +66,7 @@ export const loginUser = createAsyncThunk<
   }
 });
 
-/* =======================
-   SLICE
-======================= */
+/* ================== SLICE ================== */
 
 const authSlice = createSlice({
   name: "auth",
@@ -68,7 +76,16 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
-      localStorage.removeItem("token");
+
+      if (typeof window !== "undefined") {
+        // Clear localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        // Clear cookies for middleware
+        document.cookie = "token=; Max-Age=0; path=/";
+        document.cookie = "user=; Max-Age=0; path=/";
+      }
     },
   },
   extraReducers: (builder) => {
@@ -84,7 +101,14 @@ const authSlice = createSlice({
           state.loading = false;
           state.user = action.payload.user;
           state.token = action.payload.token;
-          localStorage.setItem("token", action.payload.token);
+
+          if (typeof window !== "undefined") {
+            localStorage.setItem("token", action.payload.token);
+            localStorage.setItem("user", JSON.stringify(action.payload.user));
+
+            document.cookie = `token=${action.payload.token}; path=/`;
+            document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
+          }
         }
       )
       .addCase(signupUser.rejected, (state, action) => {
@@ -103,7 +127,14 @@ const authSlice = createSlice({
           state.loading = false;
           state.user = action.payload.user;
           state.token = action.payload.token;
-          localStorage.setItem("token", action.payload.token);
+
+          if (typeof window !== "undefined") {
+            localStorage.setItem("token", action.payload.token);
+            localStorage.setItem("user", JSON.stringify(action.payload.user));
+
+            document.cookie = `token=${action.payload.token}; path=/`;
+            document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
+          }
         }
       )
       .addCase(loginUser.rejected, (state, action) => {

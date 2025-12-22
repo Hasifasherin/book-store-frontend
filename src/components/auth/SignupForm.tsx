@@ -41,9 +41,7 @@ export default function SignupForm({ onCancel }: Props) {
 
   const [errors, setErrors] = useState<SignupFormErrors>({});
 
-  /* =======================
-     VALIDATION
-  ======================= */
+  //  VALIDATION
   const validate = () => {
     const newErrors: SignupFormErrors = {};
 
@@ -63,9 +61,7 @@ export default function SignupForm({ onCancel }: Props) {
     return Object.keys(newErrors).length === 0;
   };
 
-  /* =======================
-     SUBMIT
-  ======================= */
+  // SUBMIT
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -73,7 +69,7 @@ export default function SignupForm({ onCancel }: Props) {
     try {
       await dispatch(signupUser(form)).unwrap();
       toast.success("Signup successful 🎉");
-      onCancel(); // close modal
+      onCancel(); 
     } catch (err: any) {
       toast.error(err || "Signup failed");
     }
@@ -208,7 +204,7 @@ export default function SignupForm({ onCancel }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-[#4B2E2B] py-2 rounded"
+          className="flex-1 border border-[#4B2E2B] py-2 rounded text-black"
         >
           Cancel
         </button>

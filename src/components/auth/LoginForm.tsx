@@ -27,7 +27,7 @@ export default function LoginForm({ onCancel }: Props) {
     try {
       await dispatch(loginUser({ email, password })).unwrap();
       toast.success("Login successful 🎉");
-      onCancel(); // close modal
+      onCancel(); 
     } catch (error: any) {
       toast.error(error || "Invalid email or password");
     }
