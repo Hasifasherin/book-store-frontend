@@ -1,25 +1,17 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import {
-  getSliders,
-  createSlider,
-  updateSlider,
-  deleteSlider,
-  SliderItem,
-} from "@/services/sliderService";
+import { getSliders, deleteSlider, SliderItem } from "@/services/sliderService";
 import { useAppSelector } from "@/redux/hooks";
+import AdminUploadSlider from "./AdminUploadSlider";
 
-export default function Slider({ autoPlayInterval = 5000 }) {
+export default function Slider({ autoPlayInterval = 3000 }) {
   const user = useAppSelector((state) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
   const [sliders, setSliders] = useState<SliderItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchSliders = async () => {
     const data = await getSliders();
@@ -35,13 +27,13 @@ export default function Slider({ autoPlayInterval = 5000 }) {
     if (isAdmin) return;
     if (sliders.length <= 1) return;
 
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       if (!hovering) {
         setCurrentIndex((i) => (i + 1) % sliders.length);
       }
     }, autoPlayInterval);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [sliders, hovering, autoPlayInterval, isAdmin]);
 
   const prev = () =>
@@ -49,26 +41,14 @@ export default function Slider({ autoPlayInterval = 5000 }) {
   const next = () =>
     setCurrentIndex((i) => (i + 1) % sliders.length);
 
-  /* ---------- ADMIN ACTIONS ---------- */
-  const handleFile = async (file: File, type: "add" | "edit") => {
-    const fd = new FormData();
-    fd.append("image", file);
-
-    if (type === "add") {
-      await createSlider(fd);
-    } else {
-      await updateSlider(sliders[currentIndex]._id, fd);
-    }
-
-    await fetchSliders();
-  };
-
-  const handleDelete = async () => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Delete this banner?")) return;
-    await deleteSlider(sliders[currentIndex]._id);
-    setMenuOpen(false);
+    await deleteSlider(id);
     await fetchSliders();
+    setCurrentIndex(0);
   };
+
+  const activeSlide = sliders[currentIndex] || null;
 
   if (!sliders.length) {
     return (
@@ -111,7 +91,6 @@ export default function Slider({ autoPlayInterval = 5000 }) {
           >
             ❯
           </button>
-
           <div className="absolute bottom-5 w-full flex justify-center gap-2 z-20">
             {sliders.map((_, i) => (
               <button
@@ -126,52 +105,9 @@ export default function Slider({ autoPlayInterval = 5000 }) {
         </>
       )}
 
-      {/* ADMIN HAMBURGER */}
+      {/* ADMIN CONTROLS */}
       {isAdmin && (
-        <div className="absolute top-4 right-6 z-30">
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80"
-          >
-            ☰
-          </button>
-
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 bg-white rounded shadow-lg w-32 text-sm overflow-hidden">
-              <button
-                className="w-full px-3 py-2 hover:bg-gray-100 text-left"
-                onClick={() => fileRef.current?.click()}
-              >
-                ➕ Add
-              </button>
-              <button
-                className="w-full px-3 py-2 hover:bg-gray-100 text-left"
-                onClick={() => fileRef.current?.click()}
-              >
-                ✏️ Edit
-              </button>
-              <button
-                className="w-full px-3 py-2 hover:bg-red-50 text-red-600 text-left"
-                onClick={handleDelete}
-              >
-                🗑 Delete
-              </button>
-            </div>
-          )}
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => {
-              if (!e.target.files?.[0]) return;
-              handleFile(e.target.files[0], "edit");
-              e.target.value = "";
-              setMenuOpen(false);
-            }}
-          />
-        </div>
+        <AdminUploadSlider activeSlide={activeSlide} refresh={fetchSliders} onDelete={handleDelete} />
       )}
     </section>
   );

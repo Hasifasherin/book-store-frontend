@@ -126,7 +126,7 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
         <input
           name="price"
           type="number"
-          min={0.01}
+          min={0}
           value={form.price || ""}
           onChange={onChange}
           className="w-full border border-gray-400 px-3 py-2 rounded"

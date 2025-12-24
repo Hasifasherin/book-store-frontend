@@ -1,59 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import {
-  createSlider,
-  updateSlider,
-  deleteSlider,
-  SliderItem,
-} from "@/services/sliderService";
+import { useState, useRef } from "react";
+import { createSlider, updateSlider, SliderItem } from "@/services/sliderService";
 
 interface Props {
   activeSlide: SliderItem | null;
   refresh: () => void;
+  onDelete: (id: string) => void;
 }
 
-export default function AdminUploadSlider({ activeSlide, refresh }: Props) {
+export default function AdminUploadSlider({ activeSlide, refresh, onDelete }: Props) {
   const [open, setOpen] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (type: "add" | "update") => {
-    if (!file) return alert("Select an image");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const actionTypeRef = useRef<"add" | "update">("add");
 
-    setLoading(true);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+
     const fd = new FormData();
     fd.append("image", file);
 
+    setLoading(true);
     try {
-      if (type === "add") {
+      if (actionTypeRef.current === "add") {
         await createSlider(fd);
-      } else if (type === "update" && activeSlide) {
+      } else if (actionTypeRef.current === "update" && activeSlide) {
         await updateSlider(activeSlide._id, fd);
       }
       refresh();
-      setFile(null);
       setOpen(false);
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Operation failed");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!activeSlide) return;
-    if (!confirm("Delete this banner?")) return;
-
-    setLoading(true);
-    try {
-      await deleteSlider(activeSlide._id);
-      refresh();
-      setOpen(false);
-    } catch {
-      alert("Delete failed");
-    } finally {
-      setLoading(false);
+      e.target.value = "";
     }
   };
 
@@ -62,42 +46,42 @@ export default function AdminUploadSlider({ activeSlide, refresh }: Props) {
       {/* Hamburger */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="bg-black/60 text-white px-3 py-2 rounded-full hover:bg-black"
+        className="bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center"
       >
-        ⋮
+        ☰
       </button>
 
       {open && (
         <div className="mt-2 w-44 bg-white rounded shadow-lg p-2 space-y-2">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) =>
-              e.target.files && setFile(e.target.files[0])
-            }
-            className="text-sm"
-          />
+          <input type="file" accept="image/*" hidden ref={fileRef} onChange={handleFileChange} />
 
           <button
-            onClick={() => handleSubmit("add")}
+            className="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-left"
+            onClick={() => {
+              actionTypeRef.current = "add";
+              fileRef.current?.click();
+            }}
             disabled={loading}
-            className="w-full bg-green-600 text-white py-1 rounded hover:bg-green-700"
           >
             Add Banner
           </button>
 
           <button
-            onClick={() => handleSubmit("update")}
+            className="w-full px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-left"
+            onClick={() => {
+              if (!activeSlide) return alert("No active banner to edit");
+              actionTypeRef.current = "update";
+              fileRef.current?.click();
+            }}
             disabled={loading || !activeSlide}
-            className="w-full bg-yellow-500 text-white py-1 rounded hover:bg-yellow-600"
           >
             Replace Banner
           </button>
 
           <button
-            onClick={handleDelete}
+            className="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-left"
+            onClick={() => activeSlide && onDelete(activeSlide._id)}
             disabled={loading || !activeSlide}
-            className="w-full bg-red-600 text-white py-1 rounded hover:bg-red-700"
           >
             Delete Banner
           </button>
