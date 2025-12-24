@@ -23,7 +23,7 @@ export default function Homepage() {
       {/* NORMAL PAGE CONTENT */}
       <div className="container mx-auto px-4">
         <section className="mt-10">
-          <h2 className="text-2xl font-semibold mb-6">Featured Books</h2>
+          
           <BookGrid userRole={userRole} />
         </section>
       </div>
