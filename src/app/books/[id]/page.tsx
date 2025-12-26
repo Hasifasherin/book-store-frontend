@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchBookById } from "@/redux/slices/bookSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
+import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
 import toast from "react-hot-toast";
 
 export default function BookDetailsPage() {
@@ -14,6 +15,7 @@ export default function BookDetailsPage() {
 
   const { selectedBook, loading } = useAppSelector((state) => state.books);
   const cartItems = useAppSelector((state) => state.cart.items);
+  const wishlistItems = useAppSelector((state) => state.wishlist.items);
 
   useEffect(() => {
     if (id) dispatch(fetchBookById(id));
@@ -24,6 +26,7 @@ export default function BookDetailsPage() {
   }
 
   const isInCart = cartItems.some((i) => i.bookId === selectedBook._id);
+  const isInWishlist = wishlistItems.some((i) => i._id === selectedBook._id);
 
   const handleAddToCart = () => {
     if (!isInCart) {
@@ -31,6 +34,16 @@ export default function BookDetailsPage() {
       toast.success("Book added to cart!");
     } else {
       router.push("/cart");
+    }
+  };
+
+  const handleToggleWishlist = () => {
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(selectedBook._id));
+      toast.success("Removed from wishlist");
+    } else {
+      dispatch(addToWishlist(selectedBook));
+      toast.success("Added to wishlist");
     }
   };
 
@@ -47,9 +60,7 @@ export default function BookDetailsPage() {
       <div>
         <h1 className="text-3xl font-bold mb-2">{selectedBook.title}</h1>
         <p className="text-gray-600 mb-4">by {selectedBook.authorName}</p>
-
         <p className="mb-4 text-lg">{selectedBook.description}</p>
-
         <p className="text-xl font-semibold">
           ₹
           {selectedBook.discount
@@ -68,8 +79,13 @@ export default function BookDetailsPage() {
           >
             {isInCart ? "Go to Cart" : "Add to Cart"}
           </button>
-          <button className="border px-6 py-2 rounded hover:bg-gray-100">
-            Wishlist
+          <button
+            onClick={handleToggleWishlist}
+            className={`border px-6 py-2 rounded hover:bg-gray-100 ${
+              isInWishlist ? "bg-red-500 text-white border-red-500" : ""
+            }`}
+          >
+            {isInWishlist ? "Added to Wishlist" : "Wishlist"}
           </button>
         </div>
       </div>

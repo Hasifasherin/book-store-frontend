@@ -13,6 +13,7 @@ import BookCard from "./BookCard";
 import BookForm from "./BookForm";
 import DeleteModal from "./DeleteModal";
 import axios from "axios";
+import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
 
 interface BookGridProps {
   userRole: "admin" | "seller" | "buyer";
@@ -34,6 +35,7 @@ type BookFormState = {
 export default function BookGrid({ userRole }: BookGridProps) {
   const dispatch = useAppDispatch();
   const { books, loading, error } = useAppSelector((state) => state.books);
+  const wishlistItems = useAppSelector((state) => state.wishlist.items);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BookFormState | null>(null);
@@ -44,9 +46,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
   const [mounted, setMounted] = useState(false);
 
   // Track expanded categories
-  const [expandedCategories, setExpandedCategories] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -56,9 +56,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/categories`
-      );
+      const res = await axios.get<Category[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
       setCategories(res.data);
     } catch (err) {
       console.error("Failed to fetch categories", err);
@@ -118,17 +116,24 @@ export default function BookGrid({ userRole }: BookGridProps) {
     }
   };
 
+  // Wishlist helpers
+  const isInWishlist = (bookId: string) => wishlistItems.some((item) => item._id === bookId);
+
+  const handleToggleWishlist = (book: Book) => {
+    if (isInWishlist(book._id)) {
+      dispatch(removeFromWishlist(book._id));
+    } else {
+      dispatch(addToWishlist(book));
+    }
+  };
+
   if (!mounted) return null;
   if (loading) return <p className="text-center py-10">Loading books…</p>;
-  if (error)
-    return <p className="text-center py-10 text-red-600">{error}</p>;
+  if (error) return <p className="text-center py-10 text-red-600">{error}</p>;
 
   // Group books by category
   const booksByCategory = books.reduce((acc: Record<string, Book[]>, book) => {
-    const categoryName =
-      categories.find((c) => c._id === book.categoryId)?.name ||
-      "Uncategorized";
-
+    const categoryName = categories.find((c) => c._id === book.categoryId)?.name || "Uncategorized";
     if (!acc[categoryName]) acc[categoryName] = [];
     acc[categoryName].push(book);
     return acc;
@@ -148,54 +153,47 @@ export default function BookGrid({ userRole }: BookGridProps) {
       )}
 
       {/* CATEGORY SECTIONS */}
-      {Object.entries(booksByCategory).map(
-        ([categoryName, categoryBooks]) => {
-          const isExpanded = expandedCategories[categoryName] || false;
-          const booksToShow = isExpanded
-            ? categoryBooks
-            : categoryBooks.slice(0, 8);
+      {Object.entries(booksByCategory).map(([categoryName, categoryBooks]) => {
+        const isExpanded = expandedCategories[categoryName] || false;
+        const booksToShow = isExpanded ? categoryBooks : categoryBooks.slice(0, 8);
 
-          return (
-            <section key={categoryName} className="mb-12">
-              {/* CATEGORY HEADER */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold text-white">
-                  {categoryName}
-                </h2>
+        return (
+          <section key={categoryName} className="mb-12">
+            {/* CATEGORY HEADER */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold text-white">{categoryName}</h2>
 
-                {categoryBooks.length > 8 && (
-                  <button
-                    onClick={() =>
-                      setExpandedCategories((prev) => ({
-                        ...prev,
-                        [categoryName]: !prev[categoryName],
-                      }))
-                    }
-                    className="text-sm font-medium text-blue-400 hover:text-blue-500 transition"
-                  >
-                    {isExpanded ? "View Less" : "View More"}
-                  </button>
-                )}
-              </div>
+              {categoryBooks.length > 8 && (
+                <button
+                  onClick={() =>
+                    setExpandedCategories((prev) => ({
+                      ...prev,
+                      [categoryName]: !prev[categoryName],
+                    }))
+                  }
+                  className="text-sm font-medium text-blue-400 hover:text-blue-500 transition"
+                >
+                  {isExpanded ? "View Less" : "View More"}
+                </button>
+              )}
+            </div>
 
-              {/* BOOK GRID */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {booksToShow.map((book) => (
-                  <BookCard
-                    key={book._id}
-                    book={book}
-                    userRole={userRole}
-                    onEdit={() => openEdit(book)}
-                    onDelete={() => setDeleteId(book._id)}
-                    onAddToCart={() => {}}
-                    onToggleWishlist={() => {}}
-                  />
-                ))}
-              </div>
-            </section>
-          );
-        }
-      )}
+            {/* BOOK GRID */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {booksToShow.map((book) => (
+                <BookCard
+                  key={book._id}
+                  book={book}
+                  userRole={userRole}
+                  onEdit={() => openEdit(book)}
+                  onDelete={() => setDeleteId(book._id)}
+                  onToggleWishlist={() => handleToggleWishlist(book)}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       {form && (
         <BookForm

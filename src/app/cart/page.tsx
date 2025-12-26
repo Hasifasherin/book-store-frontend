@@ -1,20 +1,19 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { removeFromCart, clearCart, updateQuantity } from "@/redux/slices/cartSlice";
-import { addToWishlist } from "@/redux/slices/wishlistSlice"; // make sure wishlist slice exists
+import { removeFromCart, clearCart, updateQuantity, addToCart } from "@/redux/slices/cartSlice";
+import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
 import Link from "next/link";
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.cart);
+  const wishlistItems = useAppSelector((state) => state.wishlist.items);
 
-  const handleRemove = (bookId: string) => {
-    dispatch(removeFromCart(bookId));
-  };
+  const handleRemove = (bookId: string) => dispatch(removeFromCart(bookId));
 
   const handleMoveToWishlist = (item: any) => {
-    dispatch(addToWishlist(item));
+    dispatch(addToWishlist({ ...item, _id: item.bookId }));
     dispatch(removeFromCart(item.bookId));
   };
 
@@ -25,6 +24,9 @@ export default function CartPage() {
     if (newQty < 1) return;
     dispatch(updateQuantity({ bookId, quantity: newQty }));
   };
+
+  const isInWishlist = (bookId: string) =>
+    wishlistItems.some((w) => w._id === bookId);
 
   if (!items.length) {
     return (
@@ -47,7 +49,6 @@ export default function CartPage() {
   return (
     <div className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-3 space-y-4">
           {items.map((item) => (
@@ -55,7 +56,6 @@ export default function CartPage() {
               key={item.bookId}
               className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded shadow"
             >
-              {/* Book Info */}
               <div className="flex items-center gap-4">
                 <img
                   src={item.coverImage || "/placeholder-book.png"}
@@ -63,12 +63,13 @@ export default function CartPage() {
                   className="w-20 h-28 object-cover rounded"
                 />
                 <div>
-                  <h2 className="font-semibold text-lg text-black dark:text-white">
-                    {item.title}
+                  <h2 className="font-semibold text-lg text-black dark:text-white flex items-center gap-2">
+                    {item.title}{" "}
+                    {isInWishlist(item.bookId) && <span className="text-red-500">❤️</span>}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-300">₹{item.price  * item.quantity}</p>
-
-                  {/* Quantity + / − buttons */}
+                  <p className="text-gray-600 dark:text-gray-300">
+                    ₹{item.price * item.quantity}
+                  </p>
                   <div className="flex items-center gap-2 mt-2 text-white">
                     <span>Qty:</span>
                     <button
@@ -87,31 +88,28 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons */}
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => handleRemove(item.bookId)}
-                  className="px-4 py-2 rounded font-medium border border-red-600 text-red-600 
-                             hover:bg-red-600 hover:text-white transition-colors
-                             dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-black"
+                  className="px-4 py-2 rounded font-medium border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-colors dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-black"
                 >
                   Remove
                 </button>
                 <button
                   onClick={() => handleMoveToWishlist(item)}
-                  className="px-4 py-2 rounded font-medium border border-purple-600 text-purple-600
-                             hover:bg-purple-600 hover:text-white transition-colors
-                             dark:border-purple-400 dark:text-purple-400 dark:hover:bg-purple-400 dark:hover:text-black"
+                  className={`px-4 py-2 rounded font-medium border transition-colors ${
+                    isInWishlist(item.bookId)
+                      ? "border-red-500 text-red-500 hover:bg-red-100 dark:border-red-400 dark:hover:bg-red-400"
+                      : "border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white dark:border-purple-400 dark:hover:bg-purple-400 dark:hover:text-black"
+                  }`}
                 >
-                  Move to Wishlist
+                  {isInWishlist(item.bookId) ? "In Wishlist" : "Move to Wishlist"}
                 </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Summary */}
         <div className="md:col-span-1 bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
           <h2 className="text-xl font-semibold">Order Summary</h2>
           <p className="flex justify-between text-black dark:text-white">
