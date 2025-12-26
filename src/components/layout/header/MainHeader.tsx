@@ -23,6 +23,11 @@ export default function MainHeader() {
 
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const cartItems = useAppSelector((state) => state.cart.items);
+  const wishlistItems = useAppSelector((state) => state.wishlist.items);
+
+  const totalCartQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalWishlist = wishlistItems.length;
 
   /* ✅ Ensure client-only rendering (HYDRATION FIX) */
   useEffect(() => {
@@ -126,12 +131,24 @@ export default function MainHeader() {
           )
         )}
 
-        {/* Cart & Wishlist */}
-        <Link href="/cart">
+        {/* Cart */}
+        <Link href="/cart" className="relative">
           <ShoppingBag className="cursor-pointer" />
+          {totalCartQty > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              {totalCartQty}
+            </span>
+          )}
         </Link>
-        <Link href="/wishlist">
+
+        {/* Wishlist */}
+        <Link href="/wishlist" className="relative">
           <Heart className="cursor-pointer" />
+          {totalWishlist > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              {totalWishlist}
+            </span>
+          )}
         </Link>
       </div>
 

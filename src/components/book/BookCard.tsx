@@ -2,6 +2,8 @@
 
 import { Book } from "@/types/book";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/redux/hooks";
+import { addToCart } from "@/redux/slices/cartSlice";
 
 interface BookCardProps {
   book: Book;
@@ -21,6 +23,8 @@ export default function BookCard({
   onToggleWishlist,
 }: BookCardProps) {
   const router = useRouter();
+
+  const dispatch = useAppDispatch();
 
   const finalPrice = book.discount
     ? Math.round(book.price - (book.price * book.discount) / 100)
@@ -105,11 +109,12 @@ export default function BookCard({
         {/* Add to Cart */}
         {userRole === "buyer" && (
           <button
-            onClick={() => onAddToCart?.()}
-            className="mt-3 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
+            onClick={() => dispatch(addToCart(book))}
+            className="mt-3 w-full bg-purple-600 text-white py-2 rounded"
           >
             Add to Cart
           </button>
+
         )}
       </div>
     </div>

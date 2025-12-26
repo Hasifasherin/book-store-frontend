@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchBookById } from "@/redux/slices/bookSlice";
+import { addToCart } from "@/redux/slices/cartSlice";
+import toast from "react-hot-toast";
 
 export default function BookDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const dispatch = useAppDispatch();
 
   const { selectedBook, loading } = useAppSelector((state) => state.books);
+  const cartItems = useAppSelector((state) => state.cart.items);
 
   useEffect(() => {
     if (id) dispatch(fetchBookById(id));
@@ -18,6 +22,17 @@ export default function BookDetailsPage() {
   if (loading || !selectedBook) {
     return <div className="py-10 text-center">Loading book...</div>;
   }
+
+  const isInCart = cartItems.some((i) => i.bookId === selectedBook._id);
+
+  const handleAddToCart = () => {
+    if (!isInCart) {
+      dispatch(addToCart(selectedBook));
+      toast.success("Book added to cart!");
+    } else {
+      router.push("/cart");
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-10 grid md:grid-cols-2 gap-8">
@@ -31,20 +46,27 @@ export default function BookDetailsPage() {
       {/* Details */}
       <div>
         <h1 className="text-3xl font-bold mb-2">{selectedBook.title}</h1>
-        <p className="text-gray-600 mb-4">
-          by {selectedBook.authorName}
-        </p>
+        <p className="text-gray-600 mb-4">by {selectedBook.authorName}</p>
 
         <p className="mb-4 text-lg">{selectedBook.description}</p>
 
         <p className="text-xl font-semibold">
-          ₹{selectedBook.price}
+          ₹
+          {selectedBook.discount
+            ? Math.round(
+                selectedBook.price -
+                  (selectedBook.price * selectedBook.discount) / 100
+              )
+            : selectedBook.price}
         </p>
 
-        {/* Cart / Wishlist buttons (next step) */}
+        {/* Cart / Wishlist buttons */}
         <div className="flex gap-4 mt-6">
-          <button className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700">
-            Add to Cart
+          <button
+            onClick={handleAddToCart}
+            className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700"
+          >
+            {isInCart ? "Go to Cart" : "Add to Cart"}
           </button>
           <button className="border px-6 py-2 rounded hover:bg-gray-100">
             Wishlist
