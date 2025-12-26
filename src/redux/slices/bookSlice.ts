@@ -2,12 +2,12 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { Book } from "@/types/book";
 
-// Axios instance
+/* ===================== AXIOS ===================== */
+
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
-// Attach token
 API.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -16,14 +16,18 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+/* ===================== STATE ===================== */
+
 interface BookState {
   books: Book[];
+  selectedBook: Book | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: BookState = {
   books: [],
+  selectedBook: null,
   loading: false,
   error: null,
 };
@@ -35,18 +39,27 @@ export const fetchBooks = createAsyncThunk<Book[]>(
   "books/fetch",
   async () => {
     const res = await API.get("/api/books");
-    return res.data as Book[];
+    return res.data;
   }
 );
 
-// Add book (admin / seller)
+// ✅ Fetch book by ID (Book Details Page)
+export const fetchBookById = createAsyncThunk<Book, string>(
+  "books/fetchById",
+  async (id) => {
+    const res = await API.get(`/api/books/${id}`);
+    return res.data;
+  }
+);
+
+// Add book
 export const addBook = createAsyncThunk<Book, FormData>(
   "books/add",
   async (formData) => {
     const res = await API.post("/api/books", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return res.data as Book;
+    return res.data;
   }
 );
 
@@ -58,7 +71,7 @@ export const updateBook = createAsyncThunk<
   const res = await API.put(`/api/books/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return res.data as Book;
+  return res.data;
 });
 
 // Delete book
@@ -75,15 +88,19 @@ export const deleteBook = createAsyncThunk<string, string>(
 const bookSlice = createSlice({
   name: "books",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedBook(state) {
+      state.selectedBook = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      /* -------- FETCH -------- */
+
+      /* -------- FETCH ALL -------- */
       .addCase(fetchBooks.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(fetchBooks.fulfilled, (state, action: PayloadAction<Book[]>) => {
+      .addCase(fetchBooks.fulfilled, (state, action) => {
         state.books = action.payload;
         state.loading = false;
       })
@@ -92,34 +109,40 @@ const bookSlice = createSlice({
         state.error = action.error.message ?? "Failed to fetch books";
       })
 
-      /* -------- ADD -------- */
-      .addCase(addBook.fulfilled, (state, action: PayloadAction<Book>) => {
-        state.books.unshift(action.payload);
+      /* -------- FETCH BY ID -------- */
+      .addCase(fetchBookById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(addBook.rejected, (state, action) => {
-        state.error = action.error.message ?? "Failed to add book";
+      .addCase(fetchBookById.fulfilled, (state, action) => {
+        state.selectedBook = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchBookById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to fetch book details";
+      })
+
+      /* -------- ADD -------- */
+      .addCase(addBook.fulfilled, (state, action) => {
+        state.books.unshift(action.payload);
       })
 
       /* -------- UPDATE -------- */
-      .addCase(updateBook.fulfilled, (state, action: PayloadAction<Book>) => {
+      .addCase(updateBook.fulfilled, (state, action) => {
         state.books = state.books.map((book) =>
           book._id === action.payload._id ? action.payload : book
         );
       })
-      .addCase(updateBook.rejected, (state, action) => {
-        state.error = action.error.message ?? "Failed to update book";
-      })
 
       /* -------- DELETE -------- */
-      .addCase(deleteBook.fulfilled, (state, action: PayloadAction<string>) => {
+      .addCase(deleteBook.fulfilled, (state, action) => {
         state.books = state.books.filter(
           (book) => book._id !== action.payload
         );
-      })
-      .addCase(deleteBook.rejected, (state, action) => {
-        state.error = action.error.message ?? "Failed to delete book";
       });
   },
 });
 
+export const { clearSelectedBook } = bookSlice.actions;
 export default bookSlice.reducer;

@@ -1,6 +1,7 @@
 "use client";
 
 import { Book } from "@/types/book";
+import { useRouter } from "next/navigation";
 
 interface BookCardProps {
   book: Book;
@@ -19,17 +20,24 @@ export default function BookCard({
   onAddToCart,
   onToggleWishlist,
 }: BookCardProps) {
+  const router = useRouter();
+
   const finalPrice = book.discount
     ? Math.round(book.price - (book.price * book.discount) / 100)
     : book.price;
 
+  const goToDetails = () => {
+    router.push(`/books/${book._id}`);
+  };
+
   return (
     <div className="group relative border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-lg transition">
       {/* Image */}
-      <div className="relative h-64 bg-gray-100">
+      <div className="relative h-64 bg-gray-100 cursor-pointer">
         <img
           src={book.coverImage?.trim() ? book.coverImage : "/placeholder-book.png"}
           alt={book.title}
+          onClick={goToDetails} // ✅ navigate on click
           className="h-full w-full object-cover"
         />
 
@@ -65,8 +73,17 @@ export default function BookCard({
 
       {/* Content */}
       <div className="p-4 space-y-1">
-        <h3 className="font-semibold text-lg line-clamp-1">{book.title}</h3>
-        <p className="text-sm text-gray-600 line-clamp-1">{book.authorName}</p>
+        {/* Title (clickable) */}
+        <h3
+          onClick={goToDetails} // ✅ navigate on click
+          className="font-semibold text-lg line-clamp-1 cursor-pointer hover:text-purple-600"
+        >
+          {book.title}
+        </h3>
+
+        <p className="text-sm text-gray-600 line-clamp-1">
+          {book.authorName}
+        </p>
 
         {/* Price */}
         <div className="flex items-center gap-2 mt-1">
@@ -74,10 +91,14 @@ export default function BookCard({
             <>
               <span className="text-gray-400 line-through">₹{book.price}</span>
               <span className="font-bold text-lg text-black">₹{finalPrice}</span>
-              <span className="text-sm text-red-500">{book.discount}% OFF</span>
+              <span className="text-sm text-red-500">
+                {book.discount}% OFF
+              </span>
             </>
           ) : (
-            <span className="font-bold text-lg text-black">₹{book.price}</span>
+            <span className="font-bold text-lg text-black">
+              ₹{book.price}
+            </span>
           )}
         </div>
 
