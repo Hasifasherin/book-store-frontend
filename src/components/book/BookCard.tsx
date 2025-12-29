@@ -12,7 +12,7 @@ interface BookCardProps {
   userRole: "admin" | "seller" | "buyer";
   onEdit?: () => void;
   onDelete?: () => void;
-  onToggleWishlist?: () => void; // optional prop to handle wishlist toggle externally
+  onToggleWishlist?: () => void; 
 }
 
 export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWishlist }: BookCardProps) {
@@ -28,7 +28,7 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
 
   const handleToggleWishlist = () => {
     if (onToggleWishlist) {
-      onToggleWishlist(); // use parent-provided function if available
+      onToggleWishlist(); 
     } else {
       if (isInWishlist) {
         dispatch(removeFromWishlist(book._id));

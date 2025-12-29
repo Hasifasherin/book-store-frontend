@@ -1,4 +1,3 @@
-// services/authService.ts
 export const signupUserAPI = async (data: any) => {
   const res = await fetch("http://localhost:4000/api/users/signup", {
     method: "POST",

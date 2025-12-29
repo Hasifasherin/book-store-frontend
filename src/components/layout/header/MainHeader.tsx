@@ -24,29 +24,40 @@ export default function MainHeader() {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const cartItems = useAppSelector((state) => state.cart.items);
-  const wishlistItems = useAppSelector((state) => state.wishlist.items);
+  const wishlistItems = useAppSelector(
+    (state) => state.wishlist.items
+  );
 
-  const totalCartQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCartQty = cartItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
   const totalWishlist = wishlistItems.length;
 
-  /* ✅ Ensure client-only rendering (HYDRATION FIX) */
+  /* ================= CLIENT MOUNT (HYDRATION FIX) ================= */
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  /* Close dropdown on outside click */
+  /* ================= CLICK OUTSIDE ================= */
   useEffect(() => {
     if (!mounted) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node)
+      ) {
         setOpenMenu(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
   }, [mounted]);
 
   const handleLogout = () => {
@@ -55,10 +66,10 @@ export default function MainHeader() {
     setOpenMenu(false);
   };
 
+  /* ================= RENDER ================= */
   return (
     <header className="bg-[#4B2E2B] text-[#F5F1E9] px-6 py-6 flex items-center justify-between relative">
-      
-      {/* Logo */}
+      {/* LOGO */}
       <Link href="/" className="flex items-center gap-2">
         <div className="bg-[#D35400] text-white w-8 h-8 flex items-center justify-center font-bold rounded">
           B
@@ -66,7 +77,7 @@ export default function MainHeader() {
         <span className="font-bold text-xl">Book Store</span>
       </Link>
 
-      {/* Search */}
+      {/* SEARCH */}
       <div className="flex-1 mx-6 hidden md:block">
         <div className="flex">
           <input
@@ -80,10 +91,9 @@ export default function MainHeader() {
         </div>
       </div>
 
-      {/* Right Icons */}
+      {/* RIGHT ICONS */}
       <div className="flex gap-5 items-center relative">
-        
-        {/* User / Auth (mounted guard) */}
+        {/* USER */}
         {mounted && (
           !user ? (
             <User
@@ -94,7 +104,9 @@ export default function MainHeader() {
             <div ref={menuRef} className="relative">
               <User
                 className="cursor-pointer"
-                onClick={() => setOpenMenu((prev) => !prev)}
+                onClick={() =>
+                  setOpenMenu((prev) => !prev)
+                }
               />
 
               {openMenu && (
@@ -108,7 +120,6 @@ export default function MainHeader() {
                     </p>
                   </div>
 
-                  {/* Admin / Seller */}
                   {user.role !== "buyer" && (
                     <Link
                       href={`/${user.role}/books`}
@@ -131,20 +142,20 @@ export default function MainHeader() {
           )
         )}
 
-        {/* Cart */}
+        {/* CART (MOUNTED GUARDED) */}
         <Link href="/cart" className="relative">
           <ShoppingBag className="cursor-pointer" />
-          {totalCartQty > 0 && (
+          {mounted && totalCartQty > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
               {totalCartQty}
             </span>
           )}
         </Link>
 
-        {/* Wishlist */}
+        {/* WISHLIST (MOUNTED GUARDED) */}
         <Link href="/wishlist" className="relative">
           <Heart className="cursor-pointer" />
-          {totalWishlist > 0 && (
+          {mounted && totalWishlist > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
               {totalWishlist}
             </span>
@@ -152,8 +163,10 @@ export default function MainHeader() {
         </Link>
       </div>
 
-      {/* Auth Overlay */}
-      {showAuth && <AuthOverlay onClose={() => setShowAuth(false)} />}
+      {/* AUTH MODAL */}
+      {showAuth && (
+        <AuthOverlay onClose={() => setShowAuth(false)} />
+      )}
     </header>
   );
 }

@@ -43,7 +43,7 @@ export const fetchBooks = createAsyncThunk<Book[]>(
   }
 );
 
-// ✅ Fetch book by ID (Book Details Page)
+//  Fetch book by ID (Book Details Page)
 export const fetchBookById = createAsyncThunk<Book, string>(
   "books/fetchById",
   async (id) => {

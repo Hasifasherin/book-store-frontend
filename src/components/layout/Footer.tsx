@@ -8,7 +8,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">About</h3>
           <p className="text-sm">
-            Crossword is India’s leading bookstore offering books, stationery,
+            BookOrder is India’s leading bookstore offering books, stationery,
             toys, and gifts.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function Footer() {
       </div>
 
       <div className="text-center text-sm py-4 border-t border-[#F5F1E9]/30">
-        © 2025 Crossword. All rights reserved.
+        © 2025 BookOrder. All rights reserved.
       </div>
     </footer>
   );

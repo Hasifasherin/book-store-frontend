@@ -30,11 +30,11 @@ export default function LoginModal({ isOpen, onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={() => !loading && onClose()} // outside click
+      onClick={() => !loading && onClose()} 
     >
       <div
         className="w-full max-w-md bg-white rounded-lg p-6 shadow-lg"
-        onClick={(e) => e.stopPropagation()} // prevent close inside
+        onClick={(e) => e.stopPropagation()} 
       >
         <h2 className="text-2xl font-semibold text-black mb-6 text-center">
           Sign In

@@ -21,7 +21,7 @@ interface AuthState {
   error: string | null;
 }
 
-/* ✅ SAFE LOCALSTORAGE LOAD */
+/*  SAFE LOCALSTORAGE LOAD */
 const getUserFromStorage = (): User | null => {
   if (typeof window === "undefined") return null;
   const user = localStorage.getItem("user");
