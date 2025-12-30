@@ -3,14 +3,20 @@ import axios from "axios";
 
 /* ================= TYPES ================= */
 
+export interface ReviewUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface Review {
   _id: string;
   bookId: string;
-  userId: string;
-  userName: string;
+  userId: string | ReviewUser; // ✅ FIXED
   rating: number;
   comment: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface ReviewState {
@@ -27,7 +33,7 @@ const initialState: ReviewState = {
 
 /* ================= THUNKS ================= */
 
-// FETCH REVIEWS
+// ================= FETCH REVIEWS =================
 export const fetchReviews = createAsyncThunk<Review[], string>(
   "reviews/fetchReviews",
   async (bookId) => {
@@ -35,18 +41,22 @@ export const fetchReviews = createAsyncThunk<Review[], string>(
       `${process.env.NEXT_PUBLIC_API_URL}/api/books/${bookId}/reviews`
     );
 
-    if (Array.isArray(data)) return data;
+    // backend returns { items, total, averageRating }
     if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data)) return data;
     return [];
   }
 );
 
-// ADD REVIEW
+// ================= ADD REVIEW =================
 export const addReview = createAsyncThunk<
   Review,
   {
     bookId: string;
-    review: Omit<Review, "_id" | "createdAt">; // include bookId and userId
+    review: {
+      rating: number;
+      comment: string;
+    };
     token: string;
   }
 >("reviews/addReview", async ({ bookId, review, token }) => {
@@ -63,6 +73,53 @@ export const addReview = createAsyncThunk<
   return data;
 });
 
+// ================= UPDATE REVIEW =================
+export const updateReview = createAsyncThunk<
+  Review,
+  {
+    bookId: string;
+    reviewId: string;
+    data: {
+      rating: number;
+      comment: string;
+    };
+    token: string;
+  }
+>("reviews/updateReview", async ({ reviewId, data, token }) => {
+  const res = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/books/reviews/${reviewId}`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+});
+
+// ================= DELETE REVIEW =================
+export const deleteReview = createAsyncThunk<
+  string,
+  {
+    bookId: string;
+    reviewId: string;
+    token: string;
+  }
+>("reviews/deleteReview", async ({ reviewId, token }) => {
+  await axios.delete(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/books/reviews/${reviewId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return reviewId;
+});
+
 /* ================= SLICE ================= */
 
 const reviewSlice = createSlice({
@@ -71,6 +128,8 @@ const reviewSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+
+      // FETCH
       .addCase(fetchReviews.pending, (state) => {
         state.loading = true;
       })
@@ -82,8 +141,27 @@ const reviewSlice = createSlice({
         state.loading = false;
         state.items = [];
       })
+
+      // ADD
       .addCase(addReview.fulfilled, (state, action) => {
-        state.items.unshift(action.payload); // newest first
+        state.items.unshift(action.payload);
+      })
+
+      // UPDATE
+      .addCase(updateReview.fulfilled, (state, action) => {
+        const index = state.items.findIndex(
+          (r) => r._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+      })
+
+      // DELETE
+      .addCase(deleteReview.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          (r) => r._id !== action.payload
+        );
       });
   },
 });

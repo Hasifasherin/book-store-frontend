@@ -6,64 +6,66 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { fetchBookById } from "@/redux/slices/bookSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
 import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
-import { fetchReviews, addReview } from "@/redux/slices/reviewSlice";
+import { fetchReviews, addReview, updateReview, deleteReview, Review } from "@/redux/slices/reviewSlice";
+import { Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-interface Review {
-  _id: string;
-  bookId: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-}
-
 export default function BookDetailsPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id: bookId } = useParams<{ id: string }>();
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   /* ================= REDUX ================= */
-  const { selectedBook, loading } = useAppSelector((state) => state.books);
-  const cartItems = useAppSelector((state) => state.cart.items);
-  const wishlistItems = useAppSelector((state) => state.wishlist.items);
-  const { user, token } = useAppSelector((state) => state.auth);
-
-  const reviewData: Review[] = useAppSelector((state) =>
-    Array.isArray(state.reviews.items) ? state.reviews.items : []
-  );
+  const { selectedBook, loading } = useAppSelector((s) => s.books);
+  const cartItems = useAppSelector((s) => s.cart.items);
+  const wishlistItems = useAppSelector((s) => s.wishlist.items);
+  const { user, token } = useAppSelector((s) => s.auth);
+  const reviewData = useAppSelector((s) => s.reviews.items);
 
   /* ================= LOCAL STATE ================= */
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [visibleReviews, setVisibleReviews] = useState(3);
 
-  /* ================= FETCH DATA ================= */
+  /* ================= FETCH ================= */
   useEffect(() => {
-    if (!id) return;
-    dispatch(fetchBookById(id));
-    dispatch(fetchReviews(id));
-  }, [id, dispatch]);
+    if (!bookId) return;
+    dispatch(fetchBookById(bookId));
+    dispatch(fetchReviews(bookId));
+  }, [bookId, dispatch]);
 
-  /* ================= RATING STATS ================= */
-  const { totalReviews, averageRating } = useMemo(() => {
+  /* ================= RATING ================= */
+  const { averageRating } = useMemo(() => {
     const total = reviewData.length;
-    const avg = total
-      ? reviewData.reduce((sum, r) => sum + r.rating, 0) / total
-      : 0;
-    return { totalReviews: total, averageRating: avg };
+    return {
+      averageRating: total ? reviewData.reduce((s, r) => s + r.rating, 0) / total : 0,
+    };
   }, [reviewData]);
 
-  if (loading || !selectedBook) {
-    return <div className="py-10 text-center">Loading book...</div>;
-  }
+  if (loading || !selectedBook) return <div className="py-10 text-center">Loading book...</div>;
 
   /* ================= HELPERS ================= */
   const isInCart = cartItems.some((i) => i.bookId === selectedBook._id);
   const isInWishlist = wishlistItems.some((i) => i._id === selectedBook._id);
 
-  /* ================= CART ================= */
+  const myReviews = reviewData.filter((r) => {
+    if (typeof r.userId === "string") return r.userId === user?._id;
+    return r.userId._id === user?._id;
+  });
+
+  const getReviewerName = (r: Review) => {
+    if (typeof r.userId === "string") return "User";
+    return `${r.userId.firstName} ${r.userId.lastName}`;
+  };
+
+  const getReviewerId = (r: Review) => {
+    if (typeof r.userId === "string") return r.userId;
+    return r.userId._id;
+  };
+
+  /* ================= CART / WISHLIST ================= */
   const handleAddToCart = () => {
     if (!isInCart) {
       dispatch(addToCart(selectedBook));
@@ -73,7 +75,6 @@ export default function BookDetailsPage() {
     }
   };
 
-  /* ================= WISHLIST ================= */
   const handleToggleWishlist = () => {
     if (isInWishlist) {
       dispatch(removeFromWishlist(selectedBook._id));
@@ -84,84 +85,84 @@ export default function BookDetailsPage() {
     }
   };
 
-  /* ================= SUBMIT REVIEW ================= */
+  /* ================= ADD / UPDATE REVIEW ================= */
   const handleSubmitReview = () => {
     if (!rating || !comment.trim()) {
-      toast.error("Please select rating and write a review");
+      toast.error("Please rate and write a review");
       return;
     }
-
     if (!user || !token) {
-      toast.error("Please login to submit a review");
+      toast.error("Login required");
       return;
     }
 
-    if (reviewData.some((r) => r.userId === user._id)) {
-      toast.error("You have already reviewed this book");
-      return;
-    }
-
-    dispatch(
-      addReview({
-        bookId: selectedBook._id,
-        review: {
-          bookId: selectedBook._id,                    // ✅ include bookId
-          rating,
-          comment,
-          userId: user._id,                            // ✅ include userId
-          userName: `${user.firstName} ${user.lastName}`,
-        },
+    if (editingReviewId) {
+      dispatch(updateReview({
+        bookId,
+        reviewId: editingReviewId,
+        data: { rating, comment },
         token,
-      })
-    )
+      }))
       .unwrap()
       .then(() => {
-        dispatch(fetchReviews(selectedBook._id));       // refresh reviews
+        toast.success("Review updated");
+        setEditingReviewId(null);
         setRating(0);
         setComment("");
-        toast.success("Review submitted");
       })
-      .catch(() => toast.error("Failed to submit review"));
+      .catch(() => toast.error("Update failed"));
+      return;
+    }
+
+    dispatch(addReview({
+      bookId,
+      review: { rating, comment },
+      token,
+    }))
+    .unwrap()
+    .then(() => {
+      toast.success("Review added");
+      setRating(0);
+      setComment("");
+    })
+    .catch(() => toast.error("Submit failed"));
+  };
+
+  /* ================= DELETE REVIEW ================= */
+  const confirmDelete = () => {
+    if (!deleteId || !token) return;
+
+    dispatch(deleteReview({ bookId, reviewId: deleteId, token }))
+      .unwrap()
+      .then(() => toast.success("Review deleted"))
+      .catch(() => toast.error("Delete failed"))
+      .finally(() => setDeleteId(null));
   };
 
   /* ================= UI ================= */
   return (
     <div className="container mx-auto px-4 py-10">
       {/* BOOK DETAILS */}
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 mb-10">
         <img
           src={selectedBook.coverImage || "/placeholder-book.png"}
-          alt={selectedBook.title}
           className="w-full h-[420px] object-cover rounded"
         />
-
         <div>
-          <h1 className="text-3xl font-bold mb-2">{selectedBook.title}</h1>
-          <p className="text-gray-600 mb-2">by {selectedBook.authorName}</p>
+          <h1 className="text-3xl font-bold">{selectedBook.title}</h1>
+          <p className="text-gray-600">by {selectedBook.authorName}</p>
 
-          <div className="flex items-center gap-2 mb-4">
-            <div className="text-yellow-400 text-lg">
+          <div className="flex gap-2 items-center my-4">
+            <div className="text-yellow-400">
               {"★".repeat(Math.round(averageRating))}
               {"☆".repeat(5 - Math.round(averageRating))}
             </div>
-            <span className="text-gray-600">
-              {averageRating.toFixed(1)} ({totalReviews} reviews)
-            </span>
+            <span>({reviewData.length})</span>
           </div>
 
-          <p className="mb-4 text-lg">{selectedBook.description}</p>
+          <p>{selectedBook.description}</p>
 
-          <p className="text-xl font-semibold mb-6">
-            ₹
-            {selectedBook.discount
-              ? Math.round(
-                  selectedBook.price -
-                    (selectedBook.price * selectedBook.discount) / 100
-                )
-              : selectedBook.price}
-          </p>
-
-          <div className="flex gap-4">
+          <div className="flex gap-4 mt-6">
             <button
               onClick={handleAddToCart}
               className="bg-purple-600 text-white px-6 py-2 rounded"
@@ -171,45 +172,40 @@ export default function BookDetailsPage() {
 
             <button
               onClick={handleToggleWishlist}
-              className={`border px-6 py-2 rounded ${
-                isInWishlist ? "bg-red-500 text-white" : "hover:bg-gray-100"
-              }`}
+              className={`border px-6 py-2 rounded ${isInWishlist ? "bg-red-500 text-white" : ""}`}
             >
-              {isInWishlist ? "Added to Wishlist" : "Wishlist"}
+              {isInWishlist ? "Wishlisted" : "Wishlist"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* WRITE REVIEW */}
+      {/* REVIEW FORM */}
       {user && (
         <div className="mt-12 border p-4 rounded">
-          <h3 className="font-semibold mb-2">Write a Review</h3>
+          <h3 className="font-semibold mb-2">{editingReviewId ? "Edit Review" : "Write a Review"}</h3>
 
           <div className="flex gap-1 mb-2">
-            {[1, 2, 3, 4, 5].map((s) => (
+            {[1,2,3,4,5].map((s) => (
               <button
                 key={s}
                 onClick={() => setRating(s)}
                 className={`text-2xl ${s <= rating ? "text-yellow-400" : "text-gray-300"}`}
-              >
-                ★
-              </button>
+              >★</button>
             ))}
           </div>
 
           <textarea
+            className="border p-2 w-full rounded"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            className="border p-2 w-full rounded"
-            placeholder="Share your experience"
           />
 
           <button
             onClick={handleSubmitReview}
             className="mt-3 bg-purple-600 text-white px-4 py-2 rounded"
           >
-            Submit Review
+            {editingReviewId ? "Update Review" : "Submit Review"}
           </button>
         </div>
       )}
@@ -218,13 +214,33 @@ export default function BookDetailsPage() {
       <div className="mt-10">
         {reviewData.slice(0, visibleReviews).map((r) => (
           <div key={r._id} className="border-b py-4">
-            <p className="font-semibold">{r.userName}</p>
+            <p className="font-semibold">{getReviewerName(r)}</p>
             <div className="text-yellow-400">
               {"★".repeat(r.rating)}
               {"☆".repeat(5 - r.rating)}
             </div>
-            <p className="text-sm text-gray-500">{new Date(r.createdAt).toDateString()}</p>
             <p className="mt-2">{r.comment}</p>
+
+            {user?._id === getReviewerId(r) && (
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={() => {
+                    setEditingReviewId(r._id);
+                    setRating(r.rating);
+                    setComment(r.comment);
+                  }}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <Pencil size={18} />
+                </button>
+                <button
+                  onClick={() => setDeleteId(r._id)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            )}
           </div>
         ))}
 
@@ -237,6 +253,20 @@ export default function BookDetailsPage() {
           </button>
         )}
       </div>
+
+      {/* DELETE MODAL */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-[300px]">
+            <h3 className="font-semibold text-lg mb-2">Delete Review?</h3>
+            <p className="text-sm text-gray-600 mb-4">This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setDeleteId(null)} className="px-3 py-1 border rounded">Cancel</button>
+              <button onClick={confirmDelete} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
