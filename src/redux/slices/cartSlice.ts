@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Book } from "@/types/book";
 
+/* ================= TYPES ================= */
+
 export interface CartItem {
   bookId: string;
   title: string;
@@ -13,23 +15,23 @@ interface CartState {
   items: CartItem[];
 }
 
-const loadCart = (): CartItem[] => {
-  if (typeof window === "undefined") return [];
-  return JSON.parse(localStorage.getItem("cart") || "[]");
-};
-
-const saveCart = (items: CartItem[]) => {
-  localStorage.setItem("cart", JSON.stringify(items));
-};
-
+/* ================= INITIAL STATE ================= */
 const initialState: CartState = {
-  items: loadCart(),
+  items: [],
 };
+
+/* ================= SLICE ================= */
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
+    /* ---------- SET CART (ON LOGIN) ---------- */
+    setCart(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload;
+    },
+
+    /* ---------- ADD ---------- */
     addToCart(state, action: PayloadAction<Book>) {
       const existing = state.items.find(
         (i) => i.bookId === action.payload._id
@@ -51,17 +53,16 @@ const cartSlice = createSlice({
           quantity: 1,
         });
       }
-
-      saveCart(state.items);
     },
 
+    /* ---------- REMOVE ---------- */
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter(
         (item) => item.bookId !== action.payload
       );
-      saveCart(state.items);
     },
 
+    /* ---------- UPDATE QTY ---------- */
     updateQuantity(
       state,
       action: PayloadAction<{ bookId: string; quantity: number }>
@@ -69,22 +70,26 @@ const cartSlice = createSlice({
       const item = state.items.find(
         (i) => i.bookId === action.payload.bookId
       );
-      if (item) item.quantity = action.payload.quantity;
-      saveCart(state.items);
+      if (item) {
+        item.quantity = action.payload.quantity;
+      }
     },
 
+    /* ---------- CLEAR (ON LOGOUT) ---------- */
     clearCart(state) {
       state.items = [];
-      saveCart([]);
     },
   },
 });
+
+/* ================= EXPORTS ================= */
 
 export const {
   addToCart,
   removeFromCart,
   updateQuantity,
   clearCart,
+  setCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

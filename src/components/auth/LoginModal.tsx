@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginUser } from "@/redux/slices/authSlice";
+import { setCart } from "@/redux/slices/cartSlice";
+import { setWishlist } from "@/redux/slices/wishlistSlice";
 
 interface Props {
   isOpen: boolean;
@@ -21,20 +23,33 @@ export default function LoginModal({ isOpen, onClose }: Props) {
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await dispatch(loginUser({ email, password }));
-    if (res.meta.requestStatus === "fulfilled") {
+    try {
+      // ✅ unwrap guarantees correct payload type
+      const auth = await dispatch(loginUser({ email, password })).unwrap();
+      const user = auth.user;
+
+      /* ===== RESTORE USER CART ===== */
+      const savedCart = localStorage.getItem(`cart_${user._id}`);
+      dispatch(setCart(savedCart ? JSON.parse(savedCart) : []));
+
+      /* ===== RESTORE USER WISHLIST ===== */
+      const savedWishlist = localStorage.getItem(`wishlist_${user._id}`);
+      dispatch(setWishlist(savedWishlist ? JSON.parse(savedWishlist) : []));
+
       onClose();
+    } catch {
+      // Error already handled by auth slice
     }
   };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={() => !loading && onClose()} 
+      onClick={() => !loading && onClose()}
     >
       <div
         className="w-full max-w-md bg-white rounded-lg p-6 shadow-lg"
-        onClick={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-semibold text-black mb-6 text-center">
           Sign In
@@ -46,7 +61,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             <label className="text-sm font-medium text-black">Email</label>
             <input
               type="email"
-              className="w-full border border-black px-3 py-2 text-black placeholder-black focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full border border-black px-3 py-2 text-black focus:outline-none focus:ring-1 focus:ring-black"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -59,7 +74,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             <label className="text-sm font-medium text-black">Password</label>
             <input
               type="password"
-              className="w-full border border-black px-3 py-2 text-black placeholder-black focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full border border-black px-3 py-2 text-black focus:outline-none focus:ring-1 focus:ring-black"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
