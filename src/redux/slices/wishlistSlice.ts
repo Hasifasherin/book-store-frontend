@@ -10,7 +10,7 @@ interface WishlistState {
 }
 
 /* ================= INITIAL STATE ================= */
-// ❗ IMPORTANT: no localStorage access here
+//  IMPORTANT: no localStorage access here
 const initialState: WishlistState = {
   items: [],
 };
@@ -56,3 +56,5 @@ export const {
 } = wishlistSlice.actions;
 
 export default wishlistSlice.reducer;
+
+

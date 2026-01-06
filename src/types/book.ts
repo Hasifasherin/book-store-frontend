@@ -10,10 +10,8 @@ export interface Book {
 
   coverImage: string;
 
-  // frontend-only
-  coverImageFile?: File;
+  coverImageFile?: File; 
 
-  // optional metadata (future-safe)
   createdAt?: string;
   updatedAt?: string;
 }

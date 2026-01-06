@@ -21,7 +21,7 @@ interface AuthState {
   error: string | null;
 }
 
-/*  SAFE LOCALSTORAGE LOAD */
+/* ---------------- SAFE LOCAL STORAGE ---------------- */
 const getUserFromStorage = (): User | null => {
   if (typeof window === "undefined") return null;
   const user = localStorage.getItem("user");
@@ -40,8 +40,7 @@ const initialState: AuthState = {
   error: null,
 };
 
-/* ================== THUNKS ================== */
-
+/* ---------------- ASYNC THUNKS ---------------- */
 export const signupUser = createAsyncThunk<
   AuthResponse,
   any,
@@ -66,8 +65,7 @@ export const loginUser = createAsyncThunk<
   }
 });
 
-/* ================== SLICE ================== */
-
+/* ---------------- SLICE ---------------- */
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -78,11 +76,9 @@ const authSlice = createSlice({
       state.error = null;
 
       if (typeof window !== "undefined") {
-        // Clear localStorage
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        // Clear cookies for middleware
         document.cookie = "token=; Max-Age=0; path=/";
         document.cookie = "user=; Max-Age=0; path=/";
       }
@@ -90,53 +86,47 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      /* SIGNUP */
+      /* ---------------- SIGNUP ---------------- */
       .addCase(signupUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        signupUser.fulfilled,
-        (state, action: PayloadAction<AuthResponse>) => {
-          state.loading = false;
-          state.user = action.payload.user;
-          state.token = action.payload.token;
+      .addCase(signupUser.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
 
-          if (typeof window !== "undefined") {
-            localStorage.setItem("token", action.payload.token);
-            localStorage.setItem("user", JSON.stringify(action.payload.user));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", action.payload.token);
+          localStorage.setItem("user", JSON.stringify(action.payload.user));
 
-            document.cookie = `token=${action.payload.token}; path=/`;
-            document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
-          }
+          document.cookie = `token=${action.payload.token}; path=/`;
+          document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
         }
-      )
+      })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Signup failed";
       })
 
-      /* LOGIN */
+      /* ---------------- LOGIN ---------------- */
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        loginUser.fulfilled,
-        (state, action: PayloadAction<AuthResponse>) => {
-          state.loading = false;
-          state.user = action.payload.user;
-          state.token = action.payload.token;
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<AuthResponse>) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
 
-          if (typeof window !== "undefined") {
-            localStorage.setItem("token", action.payload.token);
-            localStorage.setItem("user", JSON.stringify(action.payload.user));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", action.payload.token);
+          localStorage.setItem("user", JSON.stringify(action.payload.user));
 
-            document.cookie = `token=${action.payload.token}; path=/`;
-            document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
-          }
+          document.cookie = `token=${action.payload.token}; path=/`;
+          document.cookie = `user=${JSON.stringify(action.payload.user)}; path=/`;
         }
-      )
+      })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed";

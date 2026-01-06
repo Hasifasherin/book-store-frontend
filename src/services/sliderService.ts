@@ -1,18 +1,16 @@
+// services/sliderService.ts
 import axios from "axios";
-
-export interface SliderItem {
-  _id: string;
-  imageUrl: string;
-}
+import { SliderItem } from "@/types/slider"; // ✅ import type from central place
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/sliders";
 
+// GET all sliders
 export const getSliders = async (): Promise<SliderItem[]> => {
   const res = await axios.get(API_URL);
   return res.data;
 };
 
-// Accept FormData for file upload
+// CREATE a new slider (FormData)
 export const createSlider = async (formData: FormData): Promise<SliderItem> => {
   const token = localStorage.getItem("token");
   const res = await axios.post(API_URL, formData, {
@@ -21,6 +19,7 @@ export const createSlider = async (formData: FormData): Promise<SliderItem> => {
   return res.data;
 };
 
+// UPDATE an existing slider by ID
 export const updateSlider = async (id: string, formData: FormData): Promise<SliderItem> => {
   const token = localStorage.getItem("token");
   const res = await axios.put(`${API_URL}/${id}`, formData, {
@@ -29,6 +28,7 @@ export const updateSlider = async (id: string, formData: FormData): Promise<Slid
   return res.data;
 };
 
+// DELETE a slider by ID
 export const deleteSlider = async (id: string): Promise<void> => {
   const token = localStorage.getItem("token");
   await axios.delete(`${API_URL}/${id}`, {

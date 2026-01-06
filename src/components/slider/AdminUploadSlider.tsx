@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createSlider, updateSlider, SliderItem } from "@/services/sliderService";
+import type { SliderItem } from "@/types/slider"; // ✅ updated import
+import { createSlider, updateSlider } from "@/services/sliderService";
 
 interface Props {
   activeSlide: SliderItem | null;
@@ -43,7 +44,6 @@ export default function AdminUploadSlider({ activeSlide, refresh, onDelete }: Pr
 
   return (
     <div className="absolute top-4 right-4 z-30">
-      {/* Hamburger */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="bg-black/60 text-white w-10 h-10 rounded-full hover:bg-black/80 flex items-center justify-center"

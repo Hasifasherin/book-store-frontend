@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -11,4 +12,4 @@ export default function LoginPage() {
       <LoginForm onCancel={() => router.push("/")} />
     </div>
   );
-}
+} 

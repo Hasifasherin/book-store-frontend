@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { getSliders, deleteSlider, SliderItem } from "@/services/sliderService";
+import { useEffect, useState } from "react";
+import { getSliders, deleteSlider } from "@/services/sliderService";
+import { SliderItem } from "@/types/slider"; // ✅ Correct type import
 import { useAppSelector } from "@/redux/hooks";
 import AdminUploadSlider from "./AdminUploadSlider";
 
-export default function Slider({ autoPlayInterval = 3000 }) {
+interface SliderProps {
+  autoPlayInterval?: number;
+}
+
+export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
   const user = useAppSelector((state) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
