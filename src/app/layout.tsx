@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Provider } from "react-redux";
@@ -6,6 +5,7 @@ import { store } from "@/redux/store";
 import Header from "@/components/layout/header/Header";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 
 export default function RootLayout({
@@ -13,18 +13,33 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  // Detect admin pages
+  const isAdminPage = pathname.startsWith("/admin");
+
   return (
     <html lang="en">
-      <body>
+      <body className="bg-white text-black">
         <Provider store={store}>
-          <Header />
+          {/* User Header only */}
+          {!isAdminPage && <Header />}
 
-          {/* Offset because header is fixed */}
-          <main className="pt-[170px] min-h-screen">{children}</main>
+          {/* Main Content */}
+          <main
+            className={
+              !isAdminPage
+                ? "pt-[170px] min-h-screen"
+                : "min-h-screen"
+            }
+          >
+            {children}
+          </main>
 
-          <Footer />
+          {/* User Footer only */}
+          {!isAdminPage && <Footer />}
 
-          {/* Global toast notifications */}
+          {/* Global Toasts */}
           <Toaster
             position="top-right"
             toastOptions={{
@@ -32,7 +47,7 @@ export default function RootLayout({
                 style: { background: "#4B2E2B", color: "#F5F1E9" },
               },
               error: {
-                style: { background: "#D35400", color: "#fff" },
+                style: { background: "#D35400", color: "#ffffff" },
               },
             }}
           />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginUser } from "@/redux/slices/authSlice";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 
 export default function LoginForm({ onCancel }: Props) {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { loading } = useAppSelector((state) => state.auth);
 
   const [email, setEmail] = useState("");
@@ -25,9 +27,16 @@ export default function LoginForm({ onCancel }: Props) {
     }
 
     try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      toast.success("Login successful 🎉");
-      onCancel(); 
+      const result = await dispatch(loginUser({ email, password })).unwrap();
+      toast.success("Login successful");
+
+      // Role-based redirect
+      const role = result.user.role;
+      if (role === "admin") {
+        router.push("/admin/dashboard"); // Admin page
+      } else {
+        router.push("/"); // Buyer/Seller page
+      }
     } catch (error: any) {
       toast.error(error || "Invalid email or password");
     }
