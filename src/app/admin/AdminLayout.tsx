@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "Announcement Bar", href: "/admin/announcement" },
     { label: "Navbar Management", href: "/admin/navbar" },
-    { label: "Slider / Banner", href: "/admin/slider" },
+    { label: "Slider / Banner", href: "/admin/sliders" },
     { label: "Books Management", href: "/admin/books" },
     { label: "Seller Display", href: "/admin/sellers" },
     { label: "User Display", href: "/admin/users" },

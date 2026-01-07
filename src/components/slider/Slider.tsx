@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { getSliders, deleteSlider } from "@/services/sliderService";
 import { SliderItem } from "@/types/slider"; // ✅ Correct type import
 import { useAppSelector } from "@/redux/hooks";
-import AdminUploadSlider from "./AdminUploadSlider";
 
 interface SliderProps {
   autoPlayInterval?: number;
@@ -29,7 +28,7 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
 
   /* ---------- AUTO PLAY ---------- */
   useEffect(() => {
-    if (isAdmin) return;
+    if (isAdmin) return; // Admin does not auto-play
     if (sliders.length <= 1) return;
 
     const interval = setInterval(() => {
@@ -77,7 +76,7 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
             i === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
-          alt="banner"
+          alt={slide.title || "banner"}
         />
       ))}
 
@@ -108,11 +107,6 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
             ))}
           </div>
         </>
-      )}
-
-      {/* ADMIN CONTROLS */}
-      {isAdmin && (
-        <AdminUploadSlider activeSlide={activeSlide} refresh={fetchSliders} onDelete={handleDelete} />
       )}
     </section>
   );
