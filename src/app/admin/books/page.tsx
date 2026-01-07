@@ -1,7 +1,12 @@
 "use client";
 
-import BookGrid from "@/components/book/BookGrid";
+import AdminLayout from "../AdminLayout";
+import AdminBooksManager from "./AdminBooksManager";
 
 export default function AdminBooksPage() {
-  return <BookGrid userRole="admin" />;
+  return (
+    <AdminLayout>
+      <AdminBooksManager />
+    </AdminLayout>
+  );
 }
