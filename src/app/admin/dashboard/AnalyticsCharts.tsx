@@ -40,16 +40,14 @@ export default function AnalyticsCharts() {
                 booksChart.current?.destroy();
                 usersChart.current?.destroy();
 
-                // Book category colors: soft earthy tones
                 const bookColors = ["#E07A5F", "#81B29A", "#F2CC8F", "#588157", "#6A7FDB", "#D9B08C"];
 
-                // Users colors: muted green for buyers, burnt orange for sellers
                 const userColors = ["#6B8E23", "#FF7F50"];
 
                 /* ---------------- Books by Category Chart (Doughnut) ---------------- */
                 if (booksCanvasRef.current) {
                     booksChart.current = new Chart(booksCanvasRef.current, {
-                        type: "doughnut", // <-- changed from 'pie' to 'doughnut'
+                        type: "doughnut", 
                         data: {
                             labels: bookStats.map((b) => b.category || "Unknown"),
                             datasets: [

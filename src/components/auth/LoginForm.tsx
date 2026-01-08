@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { loginUser } from "@/redux/slices/authSlice";
+import { setCart } from "@/redux/slices/cartSlice";
+import { setWishlist } from "@/redux/slices/wishlistSlice";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -32,13 +34,27 @@ export default function LoginForm({ onCancel }: Props) {
       // ✅ Login successful
       toast.success("Login successful");
 
+      const userId = result.user._id;
+
+      // Restore cart from localStorage
+      const savedCart = localStorage.getItem(`cart_${userId}`);
+      if (savedCart) {
+        dispatch(setCart(JSON.parse(savedCart)));
+      }
+
+      // Restore wishlist from localStorage
+      const savedWishlist = localStorage.getItem(`wishlist_${userId}`);
+      if (savedWishlist) {
+        dispatch(setWishlist(JSON.parse(savedWishlist)));
+      }
+
       // Close the login form modal
       onCancel();
 
       // Role-based redirect
       const role = result.user.role;
       if (role === "admin") {
-        router.push("/admin/dashboard"); // Admin (already handled)
+        router.push("/admin/dashboard"); // Admin
       } else if (role === "seller" || role === "buyer") {
         router.push("/"); // Buyer or seller homepage
       }

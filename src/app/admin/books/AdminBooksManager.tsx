@@ -32,7 +32,7 @@ export default function AdminBooksManager() {
       .catch(() => setCategories([]));
   }, [dispatch]);
 
-  // ✅ FILTER BOOKS BY CATEGORY
+  //FILTER BOOKS BY CATEGORY
   const filteredBooks =
     selectedCategory === "all"
       ? books
@@ -56,7 +56,7 @@ export default function AdminBooksManager() {
       {/* LEFT PANEL */}
       <div className="col-span-7 bg-white rounded shadow p-4 space-y-4">
 
-        {/* ✅ CATEGORY FILTER (Professional) */}
+        {/* CATEGORY FILTER  */}
         <div className="flex justify-between items-center">
           <select
             value={selectedCategory}

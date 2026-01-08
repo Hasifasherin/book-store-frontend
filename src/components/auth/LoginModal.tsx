@@ -24,7 +24,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     e.preventDefault();
 
     try {
-      // ✅ unwrap guarantees correct payload type
+      // unwrap guarantees correct payload type
       const auth = await dispatch(loginUser({ email, password })).unwrap();
       const user = auth.user;
 

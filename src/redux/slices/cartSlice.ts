@@ -16,8 +16,18 @@ interface CartState {
 }
 
 /* ================= INITIAL STATE ================= */
+// Load from localStorage if available
 const initialState: CartState = {
-  items: [],
+  items: typeof window !== "undefined" && localStorage.getItem("cart")
+    ? JSON.parse(localStorage.getItem("cart")!)
+    : [],
+};
+
+/* ================= HELPER ================= */
+const saveCartToLocalStorage = (items: CartItem[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("cart", JSON.stringify(items));
+  }
 };
 
 /* ================= SLICE ================= */
@@ -29,6 +39,7 @@ const cartSlice = createSlice({
     /* ---------- SET CART (ON LOGIN) ---------- */
     setCart(state, action: PayloadAction<CartItem[]>) {
       state.items = action.payload;
+      saveCartToLocalStorage(state.items);
     },
 
     /* ---------- ADD ---------- */
@@ -49,10 +60,12 @@ const cartSlice = createSlice({
                   (action.payload.price * action.payload.discount) / 100
               )
             : action.payload.price,
-          coverImage: action.payload.coverImage,
+          coverImage: action.payload.coverImage || "", 
           quantity: 1,
         });
       }
+
+      saveCartToLocalStorage(state.items);
     },
 
     /* ---------- REMOVE ---------- */
@@ -60,6 +73,7 @@ const cartSlice = createSlice({
       state.items = state.items.filter(
         (item) => item.bookId !== action.payload
       );
+      saveCartToLocalStorage(state.items);
     },
 
     /* ---------- UPDATE QTY ---------- */
@@ -73,11 +87,13 @@ const cartSlice = createSlice({
       if (item) {
         item.quantity = action.payload.quantity;
       }
+      saveCartToLocalStorage(state.items);
     },
 
     /* ---------- CLEAR (ON LOGOUT) ---------- */
     clearCart(state) {
       state.items = [];
+      saveCartToLocalStorage(state.items);
     },
   },
 });

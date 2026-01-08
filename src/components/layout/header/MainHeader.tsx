@@ -90,7 +90,7 @@ export default function MainHeader() {
       <div className="flex gap-5 items-center relative">
         {!mounted ? null : (
           <>
-            {/* USER ICON / MENU */}
+            {/* USER ICON */}
             {!user ? (
               <User className="cursor-pointer" onClick={() => setShowAuth(true)} />
             ) : (

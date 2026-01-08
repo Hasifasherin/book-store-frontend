@@ -3,7 +3,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: "admin" | "buyer" | "seller"; // added role
+  role: "admin" | "buyer" | "seller";
 }
 
 export interface AuthState {

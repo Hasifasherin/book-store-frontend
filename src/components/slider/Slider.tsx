@@ -28,7 +28,7 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
 
   /* ---------- AUTO PLAY ---------- */
   useEffect(() => {
-    if (isAdmin) return; // Admin does not auto-play
+    if (isAdmin) return; 
     if (sliders.length <= 1) return;
 
     const interval = setInterval(() => {

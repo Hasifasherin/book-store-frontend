@@ -34,14 +34,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   /* ================= COMPLETE LOGOUT ================= */
   const handleLogout = () => {
-    dispatch(logout());   // clears redux + localStorage + cookies
-    router.replace("/");  // back to home (login / signup)
+    dispatch(logout());  
+    router.replace("/");  
   };
 
   const menuItems = [
     { label: "Dashboard", href: "/admin/dashboard" },
-    { label: "Announcement Bar" },        // clickable but no redirect
-    { label: "Navbar Management" },       // clickable but no redirect
+    { label: "Announcement Bar" },        
+    { label: "Navbar Management" },     
     { label: "Slider / Banner", href: "/admin/sliders" },
     { label: "Books Management", href: "/admin/books" },
     { label: "Seller Display", href: "/admin/sellers" },

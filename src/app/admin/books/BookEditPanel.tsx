@@ -25,7 +25,7 @@ export default function BookEditPanel({
         // ADD
         await dispatch(addBook(formData)).unwrap();
       }
-      onClose(); // close panel after save
+      onClose(); 
     } catch (err: any) {
       alert(err?.message || "Failed to save book");
     }

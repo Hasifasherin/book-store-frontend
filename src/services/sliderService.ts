@@ -1,6 +1,6 @@
 // services/sliderService.ts
 import axios from "axios";
-import { SliderItem } from "@/types/slider"; // ✅ import type from central place
+import { SliderItem } from "@/types/slider"; 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/sliders";
 

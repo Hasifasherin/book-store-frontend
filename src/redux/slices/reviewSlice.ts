@@ -13,7 +13,7 @@ export interface ReviewUser {
 export interface Review {
   _id: string;
   bookId: string;
-  userId: string | ReviewUser; // ✅ FIXED
+  userId: string | ReviewUser; 
   rating: number;
   comment: string;
   createdAt: string;

@@ -61,7 +61,7 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
               </>
             ) : (
               <>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <button
                   className="text-[#D35400] font-semibold"
                   onClick={() => setIsSignup(true)}

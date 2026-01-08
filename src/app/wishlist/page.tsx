@@ -27,8 +27,8 @@ export default function WishlistPage() {
   }
 
   const handleMoveToCart = (book: any) => {
-    dispatch(removeFromWishlist(book._id)); // remove from wishlist
-    dispatch(addToCart(book)); // add to cart
+    dispatch(removeFromWishlist(book._id)); 
+    dispatch(addToCart(book)); 
   };
 
   return (

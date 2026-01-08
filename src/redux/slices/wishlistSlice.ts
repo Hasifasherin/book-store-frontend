@@ -10,9 +10,19 @@ interface WishlistState {
 }
 
 /* ================= INITIAL STATE ================= */
-//  IMPORTANT: no localStorage access here
+// Load from localStorage if available
 const initialState: WishlistState = {
-  items: [],
+  items:
+    typeof window !== "undefined" && localStorage.getItem("wishlist")
+      ? JSON.parse(localStorage.getItem("wishlist")!)
+      : [],
+};
+
+/* ================= HELPER ================= */
+const saveWishlistToLocalStorage = (items: Book[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("wishlist", JSON.stringify(items));
+  }
 };
 
 /* ================= SLICE ================= */
@@ -24,6 +34,7 @@ const wishlistSlice = createSlice({
     /* ---------- SET (ON LOGIN) ---------- */
     setWishlist(state, action: PayloadAction<Book[]>) {
       state.items = action.payload;
+      saveWishlistToLocalStorage(state.items);
     },
 
     /* ---------- ADD ---------- */
@@ -31,17 +42,20 @@ const wishlistSlice = createSlice({
       const exists = state.items.find((b) => b._id === action.payload._id);
       if (!exists) {
         state.items.push(action.payload);
+        saveWishlistToLocalStorage(state.items);
       }
     },
 
     /* ---------- REMOVE ---------- */
     removeFromWishlist(state, action: PayloadAction<string>) {
       state.items = state.items.filter((b) => b._id !== action.payload);
+      saveWishlistToLocalStorage(state.items);
     },
 
     /* ---------- CLEAR (ON LOGOUT) ---------- */
     clearWishlist(state) {
       state.items = [];
+      saveWishlistToLocalStorage(state.items);
     },
   },
 });
@@ -56,5 +70,3 @@ export const {
 } = wishlistSlice.actions;
 
 export default wishlistSlice.reducer;
-
-

@@ -22,7 +22,7 @@ export function middleware(req: NextRequest) {
   const userCookie = req.cookies.get("user")?.value;
   const user = userCookie ? JSON.parse(userCookie) : null;
 
-  // If no token or no user → redirect to home
+  // If no token or no user -> redirect to home
   if (!token || !user) {
     return NextResponse.redirect(new URL("/", req.url));
   }

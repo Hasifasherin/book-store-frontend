@@ -72,9 +72,9 @@ export default function AdminSlidersManager() {
       <SlidersGrid
         sliders={sliders}
         loading={loading}
-        onSelect={(slide) => setActiveSlide(slide)}   // ✅ matches onSelect
+        onSelect={(slide) => setActiveSlide(slide)}   
         onDelete={handleDelete}
-        onAdd={() => document.getElementById("add-slider-input")?.click()} // trigger hidden input
+        onAdd={() => document.getElementById("add-slider-input")?.click()} 
         selectedSlide={activeSlide}
       />
 
