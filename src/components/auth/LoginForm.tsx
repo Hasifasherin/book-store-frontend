@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface Props {
-  onCancel: () => void;
+  onCancel: () => void; // callback to close the login modal
 }
 
 export default function LoginForm({ onCancel }: Props) {
@@ -28,14 +28,19 @@ export default function LoginForm({ onCancel }: Props) {
 
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
+
+      // ✅ Login successful
       toast.success("Login successful");
+
+      // Close the login form modal
+      onCancel();
 
       // Role-based redirect
       const role = result.user.role;
       if (role === "admin") {
-        router.push("/admin/dashboard"); // Admin page
-      } else {
-        router.push("/"); // Buyer/Seller page
+        router.push("/admin/dashboard"); // Admin (already handled)
+      } else if (role === "seller" || role === "buyer") {
+        router.push("/"); // Buyer or seller homepage
       }
     } catch (error: any) {
       toast.error(error || "Invalid email or password");

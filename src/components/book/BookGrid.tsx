@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,7 +16,7 @@ import axios from "axios";
 import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
 
 interface BookGridProps {
-  userRole: "admin" | "seller" | "buyer";
+  userRole: "seller" | "buyer";
 }
 
 type Category = { _id: string; name: string };
@@ -46,10 +45,12 @@ export default function BookGrid({ userRole }: BookGridProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  // Track expanded categories
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedCategories, setExpandedCategories] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     dispatch(fetchBooks());
     fetchCategories();
@@ -57,13 +58,16 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get<Category[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`);
+      const res = await axios.get<Category[]>(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/categories`
+      );
       setCategories(res.data);
     } catch (err) {
       console.error("Failed to fetch categories", err);
     }
   };
 
+  // SELLER ONLY
   const openAdd = () => {
     setEditingId("new");
     setForm({
@@ -117,8 +121,9 @@ export default function BookGrid({ userRole }: BookGridProps) {
     }
   };
 
-  // Wishlist helpers
-  const isInWishlist = (bookId: string) => wishlistItems.some((item) => item._id === bookId);
+  // Wishlist (Buyer)
+  const isInWishlist = (bookId: string) =>
+    wishlistItems.some((item) => item._id === bookId);
 
   const handleToggleWishlist = (book: Book) => {
     if (isInWishlist(book._id)) {
@@ -133,16 +138,22 @@ export default function BookGrid({ userRole }: BookGridProps) {
   if (error) return <p className="text-center py-10 text-red-600">{error}</p>;
 
   // Group books by category
-  const booksByCategory = books.reduce((acc: Record<string, Book[]>, book) => {
-    const categoryName = categories.find((c) => c._id === book.categoryId)?.name || "Uncategorized";
-    if (!acc[categoryName]) acc[categoryName] = [];
-    acc[categoryName].push(book);
-    return acc;
-  }, {});
+  const booksByCategory = books.reduce(
+    (acc: Record<string, Book[]>, book) => {
+      const categoryName =
+        categories.find((c) => c._id === book.categoryId)?.name ||
+        "Uncategorized";
+      if (!acc[categoryName]) acc[categoryName] = [];
+      acc[categoryName].push(book);
+      return acc;
+    },
+    {}
+  );
 
   return (
     <div className="text-black">
-      {(userRole === "admin" || userRole === "seller") && (
+      {/* SELLER ONLY */}
+      {userRole === "seller" && (
         <div className="flex justify-end mb-6">
           <button
             onClick={openAdd}
@@ -153,48 +164,51 @@ export default function BookGrid({ userRole }: BookGridProps) {
         </div>
       )}
 
-      {/* CATEGORY SECTIONS */}
-      {Object.entries(booksByCategory).map(([categoryName, categoryBooks]) => {
-        const isExpanded = expandedCategories[categoryName] || false;
-        const booksToShow = isExpanded ? categoryBooks : categoryBooks.slice(0, 8);
+      {Object.entries(booksByCategory).map(
+        ([categoryName, categoryBooks]) => {
+          const isExpanded = expandedCategories[categoryName] || false;
+          const booksToShow = isExpanded
+            ? categoryBooks
+            : categoryBooks.slice(0, 8);
 
-        return (
-          <section key={categoryName} className="mb-12">
-            {/* CATEGORY HEADER */}
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold text-white">{categoryName}</h2>
+          return (
+            <section key={categoryName} className="mb-12">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-semibold text-white">
+                  {categoryName}
+                </h2>
 
-              {categoryBooks.length > 8 && (
-                <button
-                  onClick={() =>
-                    setExpandedCategories((prev) => ({
-                      ...prev,
-                      [categoryName]: !prev[categoryName],
-                    }))
-                  }
-                  className="text-sm font-medium text-blue-400 hover:text-blue-500 transition"
-                >
-                  {isExpanded ? "View Less" : "View More"}
-                </button>
-              )}
-            </div>
+                {categoryBooks.length > 8 && (
+                  <button
+                    onClick={() =>
+                      setExpandedCategories((prev) => ({
+                        ...prev,
+                        [categoryName]: !prev[categoryName],
+                      }))
+                    }
+                    className="text-sm font-medium text-blue-400 hover:text-blue-500"
+                  >
+                    {isExpanded ? "View Less" : "View More"}
+                  </button>
+                )}
+              </div>
 
-            {/* BOOK GRID */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {booksToShow.map((book) => (
-                <BookCard
-                  key={book._id}
-                  book={book}
-                  userRole={userRole}
-                  onEdit={() => openEdit(book)}
-                  onDelete={() => setDeleteId(book._id)}
-                  onToggleWishlist={() => handleToggleWishlist(book)}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {booksToShow.map((book) => (
+                  <BookCard
+                    key={book._id}
+                    book={book}
+                    userRole={userRole}
+                    onEdit={() => openEdit(book)}
+                    onDelete={() => setDeleteId(book._id)}
+                    onToggleWishlist={() => handleToggleWishlist(book)}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        }
+      )}
 
       {form && (
         <BookForm

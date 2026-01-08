@@ -109,14 +109,12 @@ export default function MainHeader() {
                       <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
 
-                    {user.role !== "buyer" && (
-                      <Link
-                        href={`/${user.role}/books`}
-                        className="block px-4 py-2 hover:bg-gray-100 text-sm"
-                      >
+                    {user.role === "seller" && (
+                      <Link href="/seller/books" className="block px-4 py-2 hover:bg-gray-100 text-sm">
                         Manage Books
                       </Link>
                     )}
+
 
                     <button
                       onClick={handleLogout}

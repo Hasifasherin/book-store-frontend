@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSliders, deleteSlider } from "@/services/sliderService";
-import { SliderItem } from "@/types/slider"; // ✅ Correct type import
+import { SliderItem } from "@/types/slider"; 
 import { useAppSelector } from "@/redux/hooks";
 
 interface SliderProps {
