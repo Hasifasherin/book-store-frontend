@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -24,12 +23,10 @@ export default function MainHeader() {
   const cartItems = useAppSelector((state) => state.cart.items);
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
 
-  /* ================= CLIENT MOUNT ================= */
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  /* ================= CLICK OUTSIDE ================= */
   useEffect(() => {
     if (!mounted) return;
 
@@ -42,15 +39,18 @@ export default function MainHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mounted]);
 
-  /* ================= LOGOUT ================= */
   const handleLogout = () => {
     if (user) {
-      // Save cart/wishlist per user in localStorage
-      localStorage.setItem(`cart_${user._id}`, JSON.stringify(store.getState().cart.items));
-      localStorage.setItem(`wishlist_${user._id}`, JSON.stringify(store.getState().wishlist.items));
+      localStorage.setItem(
+        `cart_${user._id}`,
+        JSON.stringify(store.getState().cart.items)
+      );
+      localStorage.setItem(
+        `wishlist_${user._id}`,
+        JSON.stringify(store.getState().wishlist.items)
+      );
     }
 
-    // Clear current memory
     dispatch(clearCart());
     dispatch(clearWishlist());
     dispatch(logout());
@@ -63,13 +63,15 @@ export default function MainHeader() {
   const totalWishlist = wishlistItems.length;
 
   return (
-    <header className="bg-[#4B2E2B] text-[#F5F1E9] px-6 py-6 flex items-center justify-between relative">
+    <header className="bg-white text-[#1F2937] px-6 py-7 flex items-center justify-between relative border-b border-[#E5E7EB]">
       {/* LOGO */}
       <Link href="/" className="flex items-center gap-2">
-        <div className="bg-[#D35400] text-white w-8 h-8 flex items-center justify-center font-bold rounded">
+        <div className="bg-[#1E2A5E] text-white w-8 h-8 flex items-center justify-center font-bold rounded">
           B
         </div>
-        <span className="font-bold text-xl">Book Store</span>
+        <span className="font-bold text-xl text-[#1E2A5E]">
+          Book Store
+        </span>
       </Link>
 
       {/* SEARCH */}
@@ -78,9 +80,9 @@ export default function MainHeader() {
           <input
             type="text"
             placeholder="Search by book name or author"
-            className="w-full px-4 py-2 rounded-l-md outline-none text-black bg-white border border-black"
+            className="w-full px-4 py-2 rounded-l-md outline-none bg-white border border-[#E5E7EB] focus:ring-2 focus:ring-[#1E2A5E]"
           />
-          <button className="bg-black px-4 rounded-r-md text-white">
+          <button className="bg-[#1E2A5E] px-4 rounded-r-md text-white hover:bg-[#16204A] transition">
             <Search size={18} />
           </button>
         </div>
@@ -90,18 +92,20 @@ export default function MainHeader() {
       <div className="flex gap-5 items-center relative">
         {!mounted ? null : (
           <>
-            {/* USER ICON */}
             {!user ? (
-              <User className="cursor-pointer" onClick={() => setShowAuth(true)} />
+              <User
+                className="cursor-pointer text-[#1E2A5E]"
+                onClick={() => setShowAuth(true)}
+              />
             ) : (
               <div ref={menuRef} className="relative">
                 <User
-                  className="cursor-pointer"
+                  className="cursor-pointer text-[#1E2A5E]"
                   onClick={() => setOpenMenu((prev) => !prev)}
                 />
 
                 {openMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded shadow-lg z-50 border">
                     <div className="px-4 py-3 border-b text-sm">
                       <p className="font-semibold">
                         {user.firstName} {user.lastName}
@@ -110,11 +114,13 @@ export default function MainHeader() {
                     </div>
 
                     {user.role === "seller" && (
-                      <Link href="/seller/books" className="block px-4 py-2 hover:bg-gray-100 text-sm">
+                      <Link
+                        href="/seller/books"
+                        className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                      >
                         Manage Books
                       </Link>
                     )}
-
 
                     <button
                       onClick={handleLogout}
@@ -128,22 +134,21 @@ export default function MainHeader() {
               </div>
             )}
 
-            {/* CART + WISHLIST (ONLY BUYER) */}
             {user?.role === "buyer" && (
               <>
-                <Link href="/cart" className="relative">
-                  <ShoppingBag className="cursor-pointer" />
+                <Link href="/cart" className="relative text-[#1E2A5E]">
+                  <ShoppingBag />
                   {totalCartQty > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-[#F97316] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                       {totalCartQty}
                     </span>
                   )}
                 </Link>
 
-                <Link href="/wishlist" className="relative">
-                  <Heart className="cursor-pointer" />
+                <Link href="/wishlist" className="relative text-[#1E2A5E]">
+                  <Heart />
                   {totalWishlist > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-[#F97316] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                       {totalWishlist}
                     </span>
                   )}
@@ -154,7 +159,6 @@ export default function MainHeader() {
         )}
       </div>
 
-      {/* AUTH MODAL */}
       {showAuth && <AuthOverlay onClose={() => setShowAuth(false)} />}
     </header>
   );

@@ -1,14 +1,19 @@
-
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { removeFromWishlist, clearWishlist } from "@/redux/slices/wishlistSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function WishlistPage() {
   const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.wishlist);
+  
+  // ✅ Client mount check
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null; // wait until client mount
 
   if (!items.length) {
     return (
@@ -18,7 +23,7 @@ export default function WishlistPage() {
           Looks like you haven't added any books yet.
         </p>
         <Link href="/">
-          <button className="px-6 py-3 bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+          <button className="px-6 py-3 bg-[#1E2A5E] text-white rounded hover:bg-[#16204A] transition">
             Continue Shopping
           </button>
         </Link>
@@ -27,8 +32,8 @@ export default function WishlistPage() {
   }
 
   const handleMoveToCart = (book: any) => {
-    dispatch(removeFromWishlist(book._id)); 
-    dispatch(addToCart(book)); 
+    dispatch(removeFromWishlist(book._id));
+    dispatch(addToCart(book));
   };
 
   return (

@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { getSliders, deleteSlider } from "@/services/sliderService";
-import { SliderItem } from "@/types/slider"; 
+import { SliderItem } from "@/types/slider";
 import { useAppSelector } from "@/redux/hooks";
 
 interface SliderProps {
   autoPlayInterval?: number;
 }
 
-export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
+export default function Slider({ autoPlayInterval = 4000 }: SliderProps) {
   const user = useAppSelector((state) => state.auth.user);
   const isAdmin = user?.role === "admin";
 
@@ -17,19 +17,13 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
 
-  const fetchSliders = async () => {
-    const data = await getSliders();
-    setSliders(data);
-  };
-
   useEffect(() => {
-    fetchSliders();
+    getSliders().then(setSliders);
   }, []);
 
   /* ---------- AUTO PLAY ---------- */
   useEffect(() => {
-    if (isAdmin) return; 
-    if (sliders.length <= 1) return;
+    if (isAdmin || sliders.length <= 1) return;
 
     const interval = setInterval(() => {
       if (!hovering) {
@@ -45,18 +39,9 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
   const next = () =>
     setCurrentIndex((i) => (i + 1) % sliders.length);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this banner?")) return;
-    await deleteSlider(id);
-    await fetchSliders();
-    setCurrentIndex(0);
-  };
-
-  const activeSlide = sliders[currentIndex] || null;
-
   if (!sliders.length) {
     return (
-      <div className="w-screen h-[360px] bg-gray-200 flex items-center justify-center">
+      <div className="w-full h-[420px] bg-gray-200 flex items-center justify-center">
         No banners
       </div>
     );
@@ -64,50 +49,60 @@ export default function Slider({ autoPlayInterval = 3000 }: SliderProps) {
 
   return (
     <section
-      className="relative w-full h-[360px] overflow-hidden"
+      className="relative w-full h-[420px] md:h-[520px] overflow-hidden bg-black -mt-px"
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
       {/* SLIDES */}
-      {sliders.map((slide, i) => (
-        <img
-          key={slide._id}
-          src={slide.imageUrl}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-            i === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-          }`}
-          alt={slide.title || "banner"}
-        />
-      ))}
+      <div
+        className="flex h-full transition-transform duration-700 ease-in-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {sliders.map((slide) => (
+          <div key={slide._id} className="min-w-full h-full relative">
+            <img
+              src={slide.imageUrl}
+              alt={slide.title || "banner"}
+              className="w-full h-full object-contain md:object-cover"
+            />
 
-      {/* USER CONTROLS */}
+            {/* DARK OVERLAY */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/10" />
+          </div>
+        ))}
+      </div>
+
+      {/* ARROWS */}
       {sliders.length > 1 && (
         <>
           <button
             onClick={prev}
-            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-10 h-10 rounded-full hover:bg-black/70"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black w-11 h-11 rounded-full shadow-md"
           >
             ❮
           </button>
           <button
             onClick={next}
-            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-10 h-10 rounded-full hover:bg-black/70"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white text-black w-11 h-11 rounded-full shadow-md"
           >
             ❯
           </button>
-          <div className="absolute bottom-5 w-full flex justify-center gap-2 z-20">
-            {sliders.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-3 h-3 rounded-full ${
-                  i === currentIndex ? "bg-white" : "bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
         </>
       )}
+
+      {/* DOTS */}
+      <div className="absolute bottom-6 w-full flex justify-center gap-3 z-20">
+        {sliders.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentIndex(i)}
+            className={`h-2 rounded-full transition-all ${i === currentIndex
+                ? "w-8 bg-white"
+                : "w-2 bg-white/60"
+              }`}
+          />
+        ))}
+      </div>
     </section>
   );
 }

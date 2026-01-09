@@ -64,12 +64,16 @@ export default function LoginForm({ onCancel }: Props) {
   };
 
   return (
-    <form onSubmit={submitHandler} className="space-y-4">
+    <form onSubmit={submitHandler} className="space-y-5 bg-white p-6 rounded-lg shadow-lg w-full max-w-sm mx-auto">
+      {/* Header */}
+      <h2 className="text-2xl font-bold text-[#1E2A5E] text-center">Login</h2>
+      <p className="text-sm text-gray-500 text-center">Welcome back! Please login to continue.</p>
+
       {/* Email */}
       <input
         type="email"
         placeholder="Email"
-        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-[#1E2A5E] text-gray-800"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -78,17 +82,17 @@ export default function LoginForm({ onCancel }: Props) {
       <input
         type="password"
         placeholder="Password"
-        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        className="w-full border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-[#1E2A5E] text-gray-800"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3 pt-3">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-[#BF5A2E] text-white py-2 rounded disabled:opacity-60"
+          className="flex-1 bg-[#1E2A5E] hover:bg-[#162145] text-white py-3 rounded transition disabled:opacity-60"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
@@ -96,11 +100,16 @@ export default function LoginForm({ onCancel }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-[#4B2E2B] text-[#4B2E2B] py-2 rounded"
+          className="flex-1 border border-gray-400 hover:border-[#1E2A5E] text-gray-700 hover:text-[#1E2A5E] py-3 rounded transition"
         >
           Cancel
         </button>
       </div>
+
+      {/* Optional Footer */}
+      <p className="text-xs text-gray-400 text-center mt-2">
+        Forgot password? <span className="text-[#1E2A5E] cursor-pointer hover:underline">Reset here</span>
+      </p>
     </form>
   );
 }

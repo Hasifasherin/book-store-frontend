@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -16,28 +15,24 @@ export default function BookDetailsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  /* ================= REDUX ================= */
   const { selectedBook, loading } = useAppSelector((s) => s.books);
   const cartItems = useAppSelector((s) => s.cart.items);
   const wishlistItems = useAppSelector((s) => s.wishlist.items);
   const { user, token } = useAppSelector((s) => s.auth);
   const reviewData = useAppSelector((s) => s.reviews.items);
 
-  /* ================= LOCAL STATE ================= */
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [visibleReviews, setVisibleReviews] = useState(3);
 
-  /* ================= FETCH ================= */
   useEffect(() => {
     if (!bookId) return;
     dispatch(fetchBookById(bookId));
     dispatch(fetchReviews(bookId));
   }, [bookId, dispatch]);
 
-  /* ================= RATING ================= */
   const { averageRating } = useMemo(() => {
     const total = reviewData.length;
     return {
@@ -45,9 +40,8 @@ export default function BookDetailsPage() {
     };
   }, [reviewData]);
 
-  if (loading || !selectedBook) return <div className="py-10 text-center">Loading book...</div>;
+  if (loading || !selectedBook) return <div className="py-10 text-center text-indigo-200">Loading book...</div>;
 
-  /* ================= HELPERS ================= */
   const isInCart = cartItems.some((i) => i.bookId === selectedBook._id);
   const isInWishlist = wishlistItems.some((i) => i._id === selectedBook._id);
 
@@ -66,7 +60,6 @@ export default function BookDetailsPage() {
     return r.userId._id;
   };
 
-  /* ================= CART / WISHLIST ================= */
   const handleAddToCart = () => {
     if (!isInCart) {
       dispatch(addToCart(selectedBook));
@@ -86,7 +79,6 @@ export default function BookDetailsPage() {
     }
   };
 
-  /* ================= ADD / UPDATE REVIEW ================= */
   const handleSubmitReview = () => {
     if (!rating || !comment.trim()) {
       toast.error("Please rate and write a review");
@@ -129,7 +121,6 @@ export default function BookDetailsPage() {
     .catch(() => toast.error("Submit failed"));
   };
 
-  /* ================= DELETE REVIEW ================= */
   const confirmDelete = () => {
     if (!deleteId || !token) return;
 
@@ -140,18 +131,17 @@ export default function BookDetailsPage() {
       .finally(() => setDeleteId(null));
   };
 
-  /* ================= UI ================= */
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div className="container mx-auto px-4 py-10 bg-gray-900 text-gray-200 min-h-screen">
       {/* BOOK DETAILS */}
       <div className="grid md:grid-cols-2 gap-8 mb-10">
         <img
           src={selectedBook.coverImage || "/placeholder-book.png"}
-          className="w-full h-[420px] object-cover rounded"
+          className="w-full h-[420px] object-cover rounded shadow-lg border border-gray-700"
         />
         <div>
-          <h1 className="text-3xl font-bold">{selectedBook.title}</h1>
-          <p className="text-gray-600">by {selectedBook.authorName}</p>
+          <h1 className="text-3xl font-bold text-indigo-300">{selectedBook.title}</h1>
+          <p className="text-gray-400 mt-1">by {selectedBook.authorName}</p>
 
           <div className="flex gap-2 items-center my-4">
             <div className="text-yellow-400">
@@ -161,19 +151,21 @@ export default function BookDetailsPage() {
             <span>({reviewData.length})</span>
           </div>
 
-          <p>{selectedBook.description}</p>
+          <p className="text-gray-300">{selectedBook.description}</p>
 
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleAddToCart}
-              className="bg-purple-600 text-white px-6 py-2 rounded"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded transition"
             >
               {isInCart ? "Go to Cart" : "Add to Cart"}
             </button>
 
             <button
               onClick={handleToggleWishlist}
-              className={`border px-6 py-2 rounded ${isInWishlist ? "bg-red-500 text-white" : ""}`}
+              className={`border border-indigo-500 px-6 py-2 rounded hover:bg-indigo-500 hover:text-white transition ${
+                isInWishlist ? "bg-red-600 text-white border-red-600" : "text-indigo-300"
+              }`}
             >
               {isInWishlist ? "Wishlisted" : "Wishlist"}
             </button>
@@ -183,28 +175,28 @@ export default function BookDetailsPage() {
 
       {/* REVIEW FORM */}
       {user && (
-        <div className="mt-12 border p-4 rounded">
-          <h3 className="font-semibold mb-2">{editingReviewId ? "Edit Review" : "Write a Review"}</h3>
+        <div className="mt-12 border border-gray-700 p-4 rounded bg-gray-800">
+          <h3 className="font-semibold mb-2 text-indigo-300">{editingReviewId ? "Edit Review" : "Write a Review"}</h3>
 
           <div className="flex gap-1 mb-2">
             {[1,2,3,4,5].map((s) => (
               <button
                 key={s}
                 onClick={() => setRating(s)}
-                className={`text-2xl ${s <= rating ? "text-yellow-400" : "text-gray-300"}`}
+                className={`text-2xl ${s <= rating ? "text-yellow-400" : "text-gray-600"}`}
               >★</button>
             ))}
           </div>
 
           <textarea
-            className="border p-2 w-full rounded"
+            className="border border-gray-600 p-2 w-full rounded bg-gray-900 text-gray-200"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
 
           <button
             onClick={handleSubmitReview}
-            className="mt-3 bg-purple-600 text-white px-4 py-2 rounded"
+            className="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition"
           >
             {editingReviewId ? "Update Review" : "Submit Review"}
           </button>
@@ -214,13 +206,13 @@ export default function BookDetailsPage() {
       {/* REVIEWS LIST */}
       <div className="mt-10">
         {reviewData.slice(0, visibleReviews).map((r) => (
-          <div key={r._id} className="border-b py-4">
-            <p className="font-semibold">{getReviewerName(r)}</p>
+          <div key={r._id} className="border-b border-gray-700 py-4">
+            <p className="font-semibold text-indigo-300">{getReviewerName(r)}</p>
             <div className="text-yellow-400">
               {"★".repeat(r.rating)}
               {"☆".repeat(5 - r.rating)}
             </div>
-            <p className="mt-2">{r.comment}</p>
+            <p className="mt-2 text-gray-300">{r.comment}</p>
 
             {user?._id === getReviewerId(r) && (
               <div className="flex gap-4 mt-2">
@@ -230,13 +222,13 @@ export default function BookDetailsPage() {
                     setRating(r.rating);
                     setComment(r.comment);
                   }}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-blue-400 hover:text-blue-600 transition"
                 >
                   <Pencil size={18} />
                 </button>
                 <button
                   onClick={() => setDeleteId(r._id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 transition"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -248,7 +240,7 @@ export default function BookDetailsPage() {
         {reviewData.length > visibleReviews && (
           <button
             onClick={() => setVisibleReviews((v) => v + 3)}
-            className="mt-4 text-purple-600"
+            className="mt-4 text-indigo-400 hover:text-indigo-600 transition"
           >
             View more reviews
           </button>
@@ -257,13 +249,13 @@ export default function BookDetailsPage() {
 
       {/* DELETE MODAL */}
       {deleteId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-[300px]">
-            <h3 className="font-semibold text-lg mb-2">Delete Review?</h3>
-            <p className="text-sm text-gray-600 mb-4">This action cannot be undone.</p>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded shadow-lg w-[300px] border border-gray-700">
+            <h3 className="font-semibold text-lg text-indigo-300 mb-2">Delete Review?</h3>
+            <p className="text-sm text-gray-400 mb-4">This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setDeleteId(null)} className="px-3 py-1 border rounded">Cancel</button>
-              <button onClick={confirmDelete} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+              <button onClick={() => setDeleteId(null)} className="px-3 py-1 border border-gray-600 rounded hover:bg-gray-700 transition">Cancel</button>
+              <button onClick={confirmDelete} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition">Delete</button>
             </div>
           </div>
         </div>

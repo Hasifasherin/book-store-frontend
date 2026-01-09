@@ -46,42 +46,47 @@ export default function AdminDashboardPage() {
     <AdminLayout>
       <div className="space-y-8">
         {/* Header */}
-        <h1 className="text-2xl font-bold text-black">
+        <h1 className="text-2xl font-bold text-[#1E293B]">
           Admin Dashboard
         </h1>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-sm font-semibold text-black">
+          {/* Card: Total Books */}
+          <div className="bg-[#F1F5F9] p-6 rounded-xl shadow-md border-l-4 border-[#2563EB]">
+            <h2 className="text-sm font-semibold text-[#1E293B]">
               Total Books
             </h2>
-            <p className="text-3xl font-bold text-black mt-2">
+            <p className="text-3xl font-bold text-[#111827] mt-2">
               {stats.books}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-sm font-semibold text-black">
+          {/* Card: Total Buyers */}
+          <div className="bg-[#F1F5F9] p-6 rounded-xl shadow-md border-l-4 border-[#10B981]">
+            <h2 className="text-sm font-semibold text-[#1E293B]">
               Total Buyers
             </h2>
-            <p className="text-3xl font-bold text-black mt-2">
+            <p className="text-3xl font-bold text-[#111827] mt-2">
               {stats.buyers}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-sm font-semibold text-black">
+          {/* Card: Total Sellers */}
+          <div className="bg-[#F1F5F9] p-6 rounded-xl shadow-md border-l-4 border-[#F59E0B]">
+            <h2 className="text-sm font-semibold text-[#1E293B]">
               Total Sellers
             </h2>
-            <p className="text-3xl font-bold text-black mt-2">
+            <p className="text-3xl font-bold text-[#111827] mt-2">
               {stats.sellers}
             </p>
           </div>
         </div>
 
         {/* Charts */}
-        <AnalyticsCharts />
+        <div className="bg-white p-6 rounded-xl shadow-md">
+          <AnalyticsCharts />
+        </div>
       </div>
     </AdminLayout>
   );

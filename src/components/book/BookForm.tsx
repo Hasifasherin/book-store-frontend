@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Book } from "@/types/book";
+import { useAppSelector } from "@/redux/hooks";
 
 type Category = { _id: string; name: string };
 
@@ -13,6 +14,9 @@ type BookFormProps = {
 };
 
 export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
+  const user = useAppSelector((state) => state.auth.user);
+  const isAdmin = user?.role === "admin";
+
   const [form, setForm] = useState({
     title: book?.title || "",
     authorName: book?.authorName || "",
@@ -57,7 +61,9 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
 
     try {
       let categoryId = form.categoryId;
-      if (!categoryId && form.newCategory) {
+
+      // Only admin can add new category
+      if (isAdmin && !categoryId && form.newCategory) {
         const token = localStorage.getItem("token");
         const res = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/api/categories`,
@@ -66,6 +72,7 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
         );
         categoryId = res.data._id;
       }
+
       fd.append("categoryId", categoryId);
     } catch {
       alert("Failed to create category");
@@ -80,92 +87,114 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <form onSubmit={submit} className="bg-white p-6 rounded w-full max-w-md space-y-3 shadow-lg">
-        <h2 className="text-xl font-bold text-center">{book ? "Edit Book" : "Add Book"}</h2>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+      <form
+        onSubmit={submit}
+        className="bg-white dark:bg-[#1E293B] rounded-xl w-full max-w-lg p-8 space-y-4 shadow-2xl border border-gray-200 dark:border-gray-700"
+      >
+        {/* Heading */}
+        <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100">
+          {book ? "Edit Book" : "Add Book"}
+        </h2>
 
+        {/* Title */}
         <input
           name="title"
           value={form.title}
           onChange={onChange}
-          className="w-full border border-gray-400 px-3 py-2 rounded"
+          className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
           placeholder="Title"
           required
         />
 
+        {/* Author */}
         <input
           name="authorName"
           value={form.authorName}
           onChange={onChange}
-          className="w-full border border-gray-400 px-3 py-2 rounded"
+          className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
           placeholder="Author"
           required
         />
 
+        {/* Category */}
         <select
           name="categoryId"
           value={form.categoryId}
           onChange={onChange}
-          className="w-full border border-gray-400 px-3 py-2 rounded"
+          className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
           required={!form.newCategory}
         >
           <option value="">Select Category</option>
           {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>{cat.name}</option>
+            <option key={cat._id} value={cat._id}>
+              {cat.name}
+            </option>
           ))}
         </select>
 
-        <input
-          name="newCategory"
-          value={form.newCategory || ""}
-          onChange={onChange}
-          placeholder="Or type new category"
-          className="w-full border border-gray-400 px-3 py-2 rounded"
-        />
+        {/* Admin can add new category */}
+        {isAdmin && (
+          <input
+            name="newCategory"
+            value={form.newCategory}
+            onChange={onChange}
+            placeholder="Or type new category"
+            className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
+          />
+        )}
 
-        <input
-          name="price"
-          type="number"
-          min={0}
-          value={form.price || ""}
-          onChange={onChange}
-          className="w-full border border-gray-400 px-3 py-2 rounded"
-          placeholder="Price"
-          required
-        />
+        {/* Price & Discount */}
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            name="price"
+            type="number"
+            min={0}
+            value={form.price || ""}
+            onChange={onChange}
+            className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
+            placeholder="Price"
+            required
+          />
+          <input
+            name="discount"
+            type="number"
+            min={0}
+            value={form.discount! > 0 ? form.discount : ""}
+            onChange={onChange}
+            className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
+            placeholder="Discount %"
+          />
+        </div>
 
-        <input
-          name="discount"
-          type="number"
-          min={0}
-          value={form.discount! > 0 ? form.discount : ""}
-          onChange={onChange}
-          className="w-full border border-gray-400 px-3 py-2 rounded"
-          placeholder="Discount %"
-        />
-
-        <div className="border border-gray-400 rounded p-2 cursor-pointer text-center hover:bg-gray-100">
-          <label className="w-full cursor-pointer">
-            {form.coverImageFile ? form.coverImageFile.name : "Choose Image"}
+        {/* Image Upload */}
+        <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2 cursor-pointer text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+          <label className="w-full cursor-pointer text-gray-800 dark:text-gray-100">
+            {form.coverImageFile ? form.coverImageFile.name : "Choose Cover Image"}
             <input type="file" name="coverImage" accept="image/*" onChange={onChange} className="hidden" />
           </label>
         </div>
 
+        {/* Image Preview */}
         {(form.coverImageFile || form.coverImage) && (
           <img
             src={form.coverImageFile ? URL.createObjectURL(form.coverImageFile) : form.coverImage}
-            className="h-40 w-full object-cover rounded"
+            className="h-48 w-full object-cover rounded-md border border-gray-300 dark:border-gray-600"
           />
         )}
 
-        <div className="flex gap-2 mt-2">
-          <button className="bg-green-600 text-white px-4 py-2 rounded w-1/2 hover:bg-green-700">
-            {saving ? "Saving…" : "Save"}
+        {/* Buttons */}
+        <div className="flex gap-4 mt-2">
+          <button
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md w-1/2 hover:bg-indigo-700 transition"
+            disabled={saving}
+          >
+            {saving ? "Saving…" : book ? "Update Book" : "Add Book"}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-400 text-white px-4 py-2 rounded w-1/2 hover:bg-gray-500"
+            className="bg-gray-400 text-white px-4 py-2 rounded-md w-1/2 hover:bg-gray-500 transition"
           >
             Cancel
           </button>

@@ -14,21 +14,20 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
   return (
     /* Overlay */
     <div
-      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
       onClick={onClose}
     >
       {/* Card */}
       <div
-        className="bg-[#F5F1E9] w-full max-w-md rounded-xl shadow-xl overflow-hidden"
+        className="bg-[#F8FAFC] w-full max-w-md rounded-xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/*  Card Header */}
+        {/* Card Header */}
         <div
-          className="bg-[#4B2E2B] text-white text-center px-4 pt-4 pb-10  rounded-b-[10%]"
-          
+          className="bg-[#1E2A5E] text-white text-center px-4 pt-4 pb-10 rounded-b-[10%]"
         >
           <div className="flex justify-center mb-3">
-            <div className="bg-[#D35400] text-white w-8 h-8 flex items-center justify-center font-bold rounded">
+            <div className="bg-[#60A5FA] text-white w-8 h-8 flex items-center justify-center font-bold rounded">
               B
             </div>
           </div>
@@ -48,12 +47,12 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
           )}
 
           {/* Switch */}
-          <div className="text-center mt-4 text-sm text-[#4B2E2B]">
+          <div className="text-center mt-4 text-sm text-[#1E2A5E]">
             {isSignup ? (
               <>
                 Already have an account?{" "}
                 <button
-                  className="text-[#D35400] font-semibold"
+                  className="text-[#60A5FA] font-semibold"
                   onClick={() => setIsSignup(false)}
                 >
                   Login
@@ -63,7 +62,7 @@ export default function AuthOverlay({ onClose }: AuthOverlayProps) {
               <>
                 Don't have an account?{" "}
                 <button
-                  className="text-[#D35400] font-semibold"
+                  className="text-[#60A5FA] font-semibold"
                   onClick={() => setIsSignup(true)}
                 >
                   Sign Up

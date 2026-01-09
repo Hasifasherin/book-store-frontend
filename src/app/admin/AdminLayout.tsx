@@ -49,10 +49,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 text-black">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B]">
       {/* ================= SIDEBAR ================= */}
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-[#4B2E2B] text-[#F5F1E9] flex flex-col z-50">
-        <div className="p-6 text-center font-bold text-xl border-b border-[#F5F1E9]/20">
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-[#1E293B] text-[#F8FAFC] flex flex-col z-50">
+        <div className="p-6 text-center font-bold text-xl border-b border-[#F8FAFC]/20">
           Admin Panel
         </div>
 
@@ -62,14 +62,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-4 py-2 rounded transition hover:bg-[#D35400]"
+                className="block px-4 py-2 rounded transition hover:bg-[#3B82F6]"
               >
                 {item.label}
               </Link>
             ) : (
               <div
                 key={item.label}
-                className="block px-4 py-2 rounded cursor-pointer hover:bg-[#D35400] transition"
+                className="block px-4 py-2 rounded cursor-pointer hover:bg-[#3B82F6] transition"
                 title="No redirect"
               >
                 {item.label}
@@ -79,7 +79,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* ================= SIDEBAR FOOTER ================= */}
-        <div className="p-4 border-t border-[#F5F1E9]/20">
+        <div className="p-4 border-t border-[#F8FAFC]/20">
           <div className="flex items-center justify-between">
             <span className="font-medium">{user?.firstName}</span>
             <button

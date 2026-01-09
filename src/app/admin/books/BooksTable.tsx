@@ -26,7 +26,7 @@ export default function BooksTable({
       <div className="flex justify-end mb-4">
         <button
           onClick={onAdd}
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+          className="bg-[#1E2A5E] text-white px-4 py-2 rounded hover:bg-[#16204A] transition"
         >
           + Add Book
         </button>

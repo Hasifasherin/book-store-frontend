@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -77,7 +76,7 @@ export default function SignupForm({ onCancel }: Props) {
   };
 
   return (
-    <form onSubmit={submitHandler} className="space-y-3">
+    <form onSubmit={submitHandler} className="space-y-2 text-sm">
       {/* Inputs */}
       {[
         { key: "firstName", label: "First Name" },
@@ -93,10 +92,10 @@ export default function SignupForm({ onCancel }: Props) {
             onChange={(e) =>
               setForm({ ...form, [key]: e.target.value })
             }
-            className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+            className="w-full border border-[#4B2E2B] px-3 py-1.5 rounded text-black text-sm"
           />
           {errors[key as keyof SignupFormState] && (
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600 mt-0.5">
               {errors[key as keyof SignupFormState]}
             </p>
           )}
@@ -104,7 +103,7 @@ export default function SignupForm({ onCancel }: Props) {
       ))}
 
       {/* Gender */}
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         {["m", "f"].map((g) => (
           <button
             key={g}
@@ -112,7 +111,7 @@ export default function SignupForm({ onCancel }: Props) {
             onClick={() =>
               setForm({ ...form, gender: g as "m" | "f" })
             }
-            className={`flex-1 py-2 rounded border ${
+            className={`flex-1 py-1.5 rounded border text-sm ${
               form.gender === g
                 ? "bg-[#BF5A2E] text-white"
                 : "border-[#4B2E2B] text-[#4B2E2B]"
@@ -123,11 +122,11 @@ export default function SignupForm({ onCancel }: Props) {
         ))}
       </div>
       {errors.gender && (
-        <p className="text-xs text-red-600">Required</p>
+        <p className="text-xs text-red-600 mt-0.5">Required</p>
       )}
 
       {/* Role */}
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         {["buyer", "seller"].map((r) => (
           <button
             key={r}
@@ -135,7 +134,7 @@ export default function SignupForm({ onCancel }: Props) {
             onClick={() =>
               setForm({ ...form, role: r as "buyer" | "seller" })
             }
-            className={`flex-1 py-2 rounded border ${
+            className={`flex-1 py-1.5 rounded border text-sm ${
               form.role === r
                 ? "bg-[#BF5A2E] text-white"
                 : "border-[#4B2E2B] text-[#4B2E2B]"
@@ -146,7 +145,7 @@ export default function SignupForm({ onCancel }: Props) {
         ))}
       </div>
       {errors.role && (
-        <p className="text-xs text-red-600">Required</p>
+        <p className="text-xs text-red-600 mt-0.5">Required</p>
       )}
 
       {/* DOB */}
@@ -156,10 +155,10 @@ export default function SignupForm({ onCancel }: Props) {
         onChange={(e) =>
           setForm({ ...form, dob: e.target.value })
         }
-        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        className="w-full border border-[#4B2E2B] px-3 py-1.5 rounded text-black text-sm"
       />
       {errors.dob && (
-        <p className="text-xs text-red-600">{errors.dob}</p>
+        <p className="text-xs text-red-600 mt-0.5">{errors.dob}</p>
       )}
 
       {/* Password */}
@@ -170,10 +169,10 @@ export default function SignupForm({ onCancel }: Props) {
         onChange={(e) =>
           setForm({ ...form, password: e.target.value })
         }
-        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        className="w-full border border-[#4B2E2B] px-3 py-1.5 rounded text-black text-sm"
       />
       {errors.password && (
-        <p className="text-xs text-red-600">{errors.password}</p>
+        <p className="text-xs text-red-600 mt-0.5">{errors.password}</p>
       )}
 
       {/* Confirm Password */}
@@ -184,20 +183,20 @@ export default function SignupForm({ onCancel }: Props) {
         onChange={(e) =>
           setForm({ ...form, confirmPassword: e.target.value })
         }
-        className="w-full border border-[#4B2E2B] p-2 rounded text-black"
+        className="w-full border border-[#4B2E2B] px-3 py-1.5 rounded text-black text-sm"
       />
       {errors.confirmPassword && (
-        <p className="text-xs text-red-600">
+        <p className="text-xs text-red-600 mt-0.5">
           {errors.confirmPassword}
         </p>
       )}
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-3">
+      <div className="flex gap-2 pt-2">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-[#BF5A2E] text-white py-2 rounded"
+          className="flex-1 bg-[#1E2A5E] hover:bg-[#162145] text-white py-1.5 rounded text-sm"
         >
           {loading ? "Signing up..." : "Submit"}
         </button>
@@ -205,7 +204,7 @@ export default function SignupForm({ onCancel }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-[#4B2E2B] py-2 rounded text-black"
+          className="flex-1 border border-[#4B2E2B] py-1.5 rounded text-black text-sm"
         >
           Cancel
         </button>

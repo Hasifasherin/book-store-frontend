@@ -45,7 +45,7 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
   const goToDetails = () => router.push(`/books/${book._id}`);
 
   return (
-    <div className="group relative border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-lg transition">
+    <div className="group relative border rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl border border-gray-100">
       {/* Image */}
       <div className="relative h-64 cursor-pointer" onClick={goToDetails}>
         <img
@@ -58,7 +58,7 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
         {userRole === "buyer" && mounted && (
           <button
             onClick={(e) => { e.stopPropagation(); handleToggleWishlist(); }}
-            className="absolute top-2 right-2 text-2xl transition-transform hover:scale-110"
+            className="absolute top-2 right-2 text-xl bg-white/90 rounded-full p-1 shadow transition-transform hover:scale-110"
             title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
             {isInWishlist ? "❤️" : "🤍"}
@@ -88,7 +88,7 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
       <div className="p-4 space-y-1">
         <h3
           onClick={goToDetails}
-          className="font-semibold text-lg line-clamp-1 cursor-pointer hover:text-purple-600"
+          className="font-semibold text-lg line-clamp-1 cursor-pointer hover:text-[#1E2A5E]"
         >
           {book.title}
         </h3>
@@ -99,11 +99,11 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
           {book.discount ? (
             <>
               <span className="text-gray-400 line-through">₹{book.price}</span>
-              <span className="font-bold text-lg text-black">₹{finalPrice}</span>
+              <span className="font-bold text-lg text-[#1E2A5E]">₹{finalPrice}</span>
               <span className="text-sm text-red-500">{book.discount}% OFF</span>
             </>
           ) : (
-            <span className="font-bold text-lg text-black">₹{book.price}</span>
+            <span className="font-bold text-lg text-[#1E2A5E]">₹{book.price}</span>
           )}
         </div>
 
@@ -111,7 +111,7 @@ export default function BookCard({ book, userRole, onEdit, onDelete, onToggleWis
         {userRole === "buyer" && (
           <button
             onClick={() => dispatch(addToCart(book))}
-            className="mt-3 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
+            className="mt-3 w-full bg-[#1E2A5E] hover:bg-[#16204A] text-white py-2 rounded hover:bg-purple-700 transition"
           >
             Add to Cart
           </button>
