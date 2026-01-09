@@ -20,6 +20,7 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
   const [form, setForm] = useState({
     title: book?.title || "",
     authorName: book?.authorName || "",
+    description: book?.description || "", // ✅ Added description here
     price: book?.price || 0,
     discount: book?.discount ?? 0,
     categoryId: book?.categoryId as string || "",
@@ -43,7 +44,7 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
     fetchCategories();
   }, []);
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, files } = e.target as any;
     if (name === "coverImage" && files?.[0]) setForm({ ...form, coverImageFile: files[0] });
     else setForm({ ...form, [name]: name === "price" || name === "discount" ? Number(value) : value });
@@ -56,13 +57,13 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
     const fd = new FormData();
     fd.append("title", form.title);
     fd.append("authorName", form.authorName);
+    fd.append("description", form.description || ""); // ✅ Append description
     fd.append("price", String(form.price));
     fd.append("discount", String(form.discount ?? 0));
 
     try {
       let categoryId = form.categoryId;
 
-      // Only admin can add new category
       if (isAdmin && !categoryId && form.newCategory) {
         const token = localStorage.getItem("token");
         const res = await axios.post(
@@ -115,6 +116,16 @@ export default function BookForm({ book, onSave, onCancel }: BookFormProps) {
           className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
           placeholder="Author"
           required
+        />
+
+        {/* Description */}
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={onChange}
+          className="w-full border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-800"
+          placeholder="Book Description (optional)"
+          rows={4}
         />
 
         {/* Category */}

@@ -24,6 +24,7 @@ type Category = { _id: string; name: string };
 type BookFormState = {
   title: string;
   authorName: string;
+  description?: string; // ✅ Added description
   price: number;
   discount?: number;
   categoryId: string;
@@ -73,6 +74,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
     setForm({
       title: "",
       authorName: "",
+      description: "", // ✅ Added description
       price: 0,
       discount: 0,
       categoryId: "",
@@ -84,6 +86,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
     setForm({
       title: book.title,
       authorName: book.authorName,
+      description: book.description || "", // ✅ Added description
       price: book.price,
       discount: book.discount,
       categoryId: book.categoryId as string,
@@ -212,7 +215,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
       {form && (
         <BookForm
-          book={form as Book}
+          book={editingId === "new" ? null : (form as Book)} // ✅ Fix for Add vs Edit
           onSave={submit}
           onCancel={() => {
             setForm(null);
