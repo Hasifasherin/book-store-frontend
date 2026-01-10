@@ -1,3 +1,5 @@
+"use client";
+
 import { Book } from "@/types/book";
 
 interface Props {
@@ -5,8 +7,10 @@ interface Props {
   loading: boolean;
   onView: (book: Book) => void;
   onEdit: (book: Book) => void;
-  onDelete: (id: string) => void;
+  onDelete: (book: Book) => void;
   onAdd: () => void;
+  userRole?: string;
+  userId?: string;
 }
 
 export default function BooksTable({
@@ -16,10 +20,18 @@ export default function BooksTable({
   onEdit,
   onDelete,
   onAdd,
+  userRole,
+  userId,
 }: Props) {
   if (loading) {
     return <p className="text-center py-6">Loading books...</p>;
   }
+
+  const canDelete = (book: Book) => {
+    const createdById =
+      typeof book.createdBy === "string" ? book.createdBy : book.createdBy?._id;
+    return userRole === "admin" || (userRole === "seller" && createdById === userId);
+  };
 
   return (
     <div>
@@ -36,6 +48,7 @@ export default function BooksTable({
         <thead className="bg-gray-100">
           <tr>
             <th className="p-3 text-left">Title</th>
+            <th className="p-3 text-left">Category</th>
             <th className="p-3 text-right">Actions</th>
           </tr>
         </thead>
@@ -43,7 +56,7 @@ export default function BooksTable({
         <tbody>
           {books.length === 0 && (
             <tr>
-              <td colSpan={2} className="p-4 text-center text-gray-500">
+              <td colSpan={3} className="p-4 text-center text-gray-500">
                 No books found
               </td>
             </tr>
@@ -52,6 +65,7 @@ export default function BooksTable({
           {books.map((book) => (
             <tr key={book._id} className="border-t hover:bg-gray-50">
               <td className="p-3">{book.title}</td>
+              <td className="p-3">{book.categoryName || "Uncategorized"}</td>
 
               <td className="p-3 text-right space-x-3">
                 <button
@@ -60,9 +74,13 @@ export default function BooksTable({
                 >
                   View
                 </button>
+
                 <button
-                  onClick={() => onDelete(book._id)}
-                  className="text-red-600 hover:underline"
+                  onClick={() => canDelete(book) ? onDelete(book) : alert("You cannot delete this book.")}
+                  className={`text-red-600 hover:underline ${
+                    !canDelete(book) ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={!canDelete(book)}
                 >
                   Delete
                 </button>

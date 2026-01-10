@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
@@ -14,6 +14,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [mounted, setMounted] = useState(false);
@@ -34,18 +35,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   /* ================= COMPLETE LOGOUT ================= */
   const handleLogout = () => {
-    dispatch(logout());  
-    router.replace("/");  
+    dispatch(logout());
+    router.replace("/");
   };
 
   const menuItems = [
     { label: "Dashboard", href: "/admin/dashboard" },
-    { label: "Announcement Bar" },        
-    { label: "Navbar Management" },     
+    { label: "Announcement Bar" },
+    { label: "Navbar Management" },
     { label: "Slider / Banner", href: "/admin/sliders" },
     { label: "Books Management", href: "/admin/books" },
+     { label: "Category Management", href: "/admin/categories" },
     { label: "Seller Display", href: "/admin/sellers" },
     { label: "User Display", href: "/admin/users" },
+   
   ];
 
   return (
@@ -62,7 +65,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.label}
                 href={item.href}
-                className="block px-4 py-2 rounded transition hover:bg-[#3B82F6]"
+                className={`block px-4 py-2 rounded transition hover:bg-[#3B82F6] ${
+                  pathname === item.href ? "bg-[#3B82F6]" : ""
+                }`}
               >
                 {item.label}
               </Link>
@@ -81,7 +86,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* ================= SIDEBAR FOOTER ================= */}
         <div className="p-4 border-t border-[#F8FAFC]/20">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{user?.firstName}</span>
+            <span className="font-medium">
+              {user?.firstName} ({user?.role})
+            </span>
             <button
               onClick={handleLogout}
               className="hover:text-red-400 transition"

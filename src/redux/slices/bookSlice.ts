@@ -1,9 +1,8 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { Book } from "@/types/book";
 
 /* ===================== AXIOS ===================== */
-
 const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
@@ -17,7 +16,6 @@ API.interceptors.request.use((config) => {
 });
 
 /* ===================== STATE ===================== */
-
 interface BookState {
   books: Book[];
   selectedBook: Book | null;
@@ -33,7 +31,6 @@ const initialState: BookState = {
 };
 
 /* ===================== THUNKS ===================== */
-
 // Fetch all books
 export const fetchBooks = createAsyncThunk<Book[]>(
   "books/fetch",
@@ -43,7 +40,7 @@ export const fetchBooks = createAsyncThunk<Book[]>(
   }
 );
 
-//  Fetch book by ID (Book Details Page)
+// Fetch book by ID
 export const fetchBookById = createAsyncThunk<Book, string>(
   "books/fetchById",
   async (id) => {
@@ -84,7 +81,6 @@ export const deleteBook = createAsyncThunk<string, string>(
 );
 
 /* ===================== SLICE ===================== */
-
 const bookSlice = createSlice({
   name: "books",
   initialState,
@@ -95,13 +91,26 @@ const bookSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-
       /* -------- FETCH ALL -------- */
       .addCase(fetchBooks.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchBooks.fulfilled, (state, action) => {
-        state.books = action.payload;
+        state.books = action.payload.map((book) => {
+          const category = book.categoryId as any;
+          return {
+            ...book,
+            categoryId:
+              typeof category === "object" && category?._id
+                ? category._id
+                : category,
+            categoryName:
+              typeof category === "object" && category?.name
+                ? category.name
+                : "",
+          };
+        });
         state.loading = false;
       })
       .addCase(fetchBooks.rejected, (state, action) => {
@@ -115,31 +124,68 @@ const bookSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchBookById.fulfilled, (state, action) => {
-        state.selectedBook = action.payload;
+        const book = action.payload;
+        const category = book.categoryId as any;
+        state.selectedBook = {
+          ...book,
+          categoryId:
+            typeof category === "object" && category?._id
+              ? category._id
+              : category,
+          categoryName:
+            typeof category === "object" && category?.name
+              ? category.name
+              : "",
+        };
         state.loading = false;
       })
       .addCase(fetchBookById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? "Failed to fetch book details";
+        state.error =
+          action.error.message ?? "Failed to fetch book details";
       })
 
       /* -------- ADD -------- */
       .addCase(addBook.fulfilled, (state, action) => {
-        state.books.unshift(action.payload);
+        const book = action.payload;
+        const category = book.categoryId as any;
+        state.books.unshift({
+          ...book,
+          categoryId:
+            typeof category === "object" && category?._id
+              ? category._id
+              : category,
+          categoryName:
+            typeof category === "object" && category?.name
+              ? category.name
+              : "",
+        });
       })
 
       /* -------- UPDATE -------- */
       .addCase(updateBook.fulfilled, (state, action) => {
-        state.books = state.books.map((book) =>
-          book._id === action.payload._id ? action.payload : book
+        const book = action.payload;
+        const category = book.categoryId as any;
+        state.books = state.books.map((b) =>
+          b._id === book._id
+            ? {
+                ...book,
+                categoryId:
+                  typeof category === "object" && category?._id
+                    ? category._id
+                    : category,
+                categoryName:
+                  typeof category === "object" && category?.name
+                    ? category.name
+                    : "",
+              }
+            : b
         );
       })
 
       /* -------- DELETE -------- */
       .addCase(deleteBook.fulfilled, (state, action) => {
-        state.books = state.books.filter(
-          (book) => book._id !== action.payload
-        );
+        state.books = state.books.filter((book) => book._id !== action.payload);
       });
   },
 });
