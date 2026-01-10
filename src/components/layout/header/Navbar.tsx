@@ -12,12 +12,12 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-[#FFFFFF]/90 text-[#1E293B] py-4 px-6 flex gap-6 font-medium uppercase text-xs overflow-x-auto backdrop-blur-sm">
+    <nav className="bg-[#1E2A5E]/90 text-white py-4 px-6 flex gap-6 font-medium uppercase text-xs overflow-x-auto backdrop-blur-sm">
       {menuItems.map((item) => (
         <Link
           key={item}
           href="/"
-          className="hover:text-[#1E2A5E] transition whitespace-nowrap"
+          className="hover:text-black transition whitespace-nowrap"
         >
           {item}
         </Link>
