@@ -10,24 +10,49 @@ export default function BookDetailsPanel({
   onClose: () => void;
 }) {
   return (
-    <div className="bg-white p-5 rounded shadow space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Book Details</h2>
-        <button onClick={onClose} className="text-gray-500">✕</button>
+    <div className="bg-white p-5 rounded-lg shadow space-y-4">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b pb-2">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Book Details
+        </h2>
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700 text-lg"
+        >
+          ✕
+        </button>
       </div>
 
-      <img
-        src={book.coverImage}
-        alt={book.title}
-        className="w-full h-52 object-cover rounded"
-      />
+      {/* Book Cover */}
+      <div className="w-full h-64 bg-gray-100 rounded flex items-center justify-center">
+        <img
+          src={book.coverImage}
+          alt={book.title}
+          className="max-h-full max-w-full object-contain rounded"
+        />
+      </div>
 
-      <div className="space-y-2 text-sm">
-        <p><b>Title:</b> {book.title}</p>
-        <p><b>Author:</b> {book.authorName}</p>
-        <p><b>Category:</b> {categoryName}</p>
-        <p><b>Price:</b> ₹{book.price}</p>
-        {book.discount && <p><b>Discount:</b> {book.discount}%</p>}
+      {/* Book Info */}
+      <div className="space-y-2 text-sm text-gray-700">
+        <p>
+          <span className="font-semibold">Title:</span> {book.title}
+        </p>
+        <p>
+          <span className="font-semibold">Author:</span> {book.authorName}
+        </p>
+        <p>
+          <span className="font-semibold">Category:</span> {categoryName}
+        </p>
+        <p>
+          <span className="font-semibold">Price:</span> ₹{book.price}
+        </p>
+        {book.discount && (
+          <p>
+            <span className="font-semibold">Discount:</span>{" "}
+            {book.discount}%
+          </p>
+        )}
       </div>
     </div>
   );

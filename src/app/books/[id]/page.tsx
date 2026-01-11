@@ -96,14 +96,14 @@ export default function BookDetailsPage() {
         data: { rating, comment },
         token,
       }))
-      .unwrap()
-      .then(() => {
-        toast.success("Review updated");
-        setEditingReviewId(null);
-        setRating(0);
-        setComment("");
-      })
-      .catch(() => toast.error("Update failed"));
+        .unwrap()
+        .then(() => {
+          toast.success("Review updated");
+          setEditingReviewId(null);
+          setRating(0);
+          setComment("");
+        })
+        .catch(() => toast.error("Update failed"));
       return;
     }
 
@@ -112,13 +112,13 @@ export default function BookDetailsPage() {
       review: { rating, comment },
       token,
     }))
-    .unwrap()
-    .then(() => {
-      toast.success("Review added");
-      setRating(0);
-      setComment("");
-    })
-    .catch(() => toast.error("Submit failed"));
+      .unwrap()
+      .then(() => {
+        toast.success("Review added");
+        setRating(0);
+        setComment("");
+      })
+      .catch(() => toast.error("Submit failed"));
   };
 
   const confirmDelete = () => {
@@ -137,8 +137,10 @@ export default function BookDetailsPage() {
       <div className="grid md:grid-cols-2 gap-8 mb-10">
         <img
           src={selectedBook.coverImage || "/placeholder-book.png"}
-          className="w-full h-[420px] object-cover rounded shadow-lg border border-gray-700"
+          alt={selectedBook.title}
+          className="w-full h-[420px] md:h-[500px] lg:h-[550px] object-contain rounded shadow-lg border border-gray-700 bg-gray-800"
         />
+
         <div>
           <h1 className="text-3xl font-bold text-indigo-300">{selectedBook.title}</h1>
           <p className="text-gray-400 mt-1">by {selectedBook.authorName}</p>
@@ -163,9 +165,8 @@ export default function BookDetailsPage() {
 
             <button
               onClick={handleToggleWishlist}
-              className={`border border-indigo-500 px-6 py-2 rounded hover:bg-indigo-500 hover:text-white transition ${
-                isInWishlist ? "bg-red-600 text-white border-red-600" : "text-indigo-300"
-              }`}
+              className={`border border-indigo-500 px-6 py-2 rounded hover:bg-indigo-500 hover:text-white transition ${isInWishlist ? "bg-red-600 text-white border-red-600" : "text-indigo-300"
+                }`}
             >
               {isInWishlist ? "Wishlisted" : "Wishlist"}
             </button>
@@ -179,7 +180,7 @@ export default function BookDetailsPage() {
           <h3 className="font-semibold mb-2 text-indigo-300">{editingReviewId ? "Edit Review" : "Write a Review"}</h3>
 
           <div className="flex gap-1 mb-2">
-            {[1,2,3,4,5].map((s) => (
+            {[1, 2, 3, 4, 5].map((s) => (
               <button
                 key={s}
                 onClick={() => setRating(s)}

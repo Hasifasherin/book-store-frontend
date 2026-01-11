@@ -4,6 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   role: "admin" | "buyer" | "seller";
+  isBlocked: boolean;
 }
 
 export interface AuthState {

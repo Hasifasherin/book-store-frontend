@@ -13,7 +13,10 @@ import BookCard from "./BookCard";
 import BookForm from "./BookForm";
 import DeleteModal from "./DeleteModal";
 import axios from "axios";
-import { addToWishlist, removeFromWishlist } from "@/redux/slices/wishlistSlice";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "@/redux/slices/wishlistSlice";
 
 interface BookGridProps {
   userRole: "seller" | "buyer";
@@ -24,7 +27,7 @@ type Category = { _id: string; name: string };
 type BookFormState = {
   title: string;
   authorName: string;
-  description?: string; // ✅ Added description
+  description?: string;
   price: number;
   discount?: number;
   categoryId: string;
@@ -37,6 +40,11 @@ export default function BookGrid({ userRole }: BookGridProps) {
   const dispatch = useAppDispatch();
   const { books, loading, error } = useAppSelector((state) => state.books);
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
+
+  // ✅ AUTH USER (FOR BLOCK STATUS)
+  const authUser = useAppSelector((state) => state.auth.user);
+  const isSellerBlocked =
+    userRole === "seller" && authUser?.isBlocked;
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BookFormState | null>(null);
@@ -68,13 +76,18 @@ export default function BookGrid({ userRole }: BookGridProps) {
     }
   };
 
-  // SELLER ONLY
+  /* ---------------- SELLER ONLY ---------------- */
   const openAdd = () => {
+    if (isSellerBlocked) {
+      alert("Your account is blocked by admin. You cannot add books.");
+      return;
+    }
+
     setEditingId("new");
     setForm({
       title: "",
       authorName: "",
-      description: "", // ✅ Added description
+      description: "",
       price: 0,
       discount: 0,
       categoryId: "",
@@ -82,11 +95,16 @@ export default function BookGrid({ userRole }: BookGridProps) {
   };
 
   const openEdit = (book: Book) => {
+    if (isSellerBlocked) {
+      alert("Your account is blocked by admin.");
+      return;
+    }
+
     setEditingId(book._id);
     setForm({
       title: book.title,
       authorName: book.authorName,
-      description: book.description || "", // ✅ Added description
+      description: book.description || "",
       price: book.price,
       discount: book.discount,
       categoryId: book.categoryId as string,
@@ -95,6 +113,11 @@ export default function BookGrid({ userRole }: BookGridProps) {
   };
 
   const submit = async (fd: FormData) => {
+    if (isSellerBlocked) {
+      alert("Blocked sellers cannot add or edit books.");
+      return;
+    }
+
     setSaving(true);
     try {
       if (editingId === "new") {
@@ -113,6 +136,12 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
   const confirmDelete = async () => {
     if (!deleteId) return;
+
+    if (isSellerBlocked) {
+      alert("Blocked sellers cannot delete books.");
+      return;
+    }
+
     setDeleting(true);
     try {
       await dispatch(deleteBook(deleteId)).unwrap();
@@ -124,7 +153,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
     }
   };
 
-  // Wishlist (Buyer)
+  /* ---------------- WISHLIST (BUYER) ---------------- */
   const isInWishlist = (bookId: string) =>
     wishlistItems.some((item) => item._id === bookId);
 
@@ -140,7 +169,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
   if (loading) return <p className="text-center py-10">Loading books…</p>;
   if (error) return <p className="text-center py-10 text-red-600">{error}</p>;
 
-  // Group books by category
+  /* ---------------- GROUP BY CATEGORY ---------------- */
   const booksByCategory = books.reduce(
     (acc: Record<string, Book[]>, book) => {
       const categoryName =
@@ -155,15 +184,33 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
   return (
     <div className="text-black">
-      {/* SELLER ONLY */}
+      {/* 🚫 BLOCK WARNING */}
+      {isSellerBlocked && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+          Your account has been blocked by admin. You cannot add, edit, or delete
+          books.
+        </div>
+      )}
+
+      {/* ADD BOOK BUTTON */}
       {userRole === "seller" && (
         <div className="flex justify-end mb-6">
-          <button
-            onClick={openAdd}
-            className="bg-[#1E2A5E] text-white px-4 py-2 rounded hover:bg-[#16204A] transition"
-          >
-            + Add Book
-          </button>
+          {isSellerBlocked ? (
+            <button
+              disabled
+              className="bg-gray-400 text-white px-4 py-2 rounded cursor-not-allowed"
+              title="Blocked by admin"
+            >
+              🚫 Add Book (Blocked)
+            </button>
+          ) : (
+            <button
+              onClick={openAdd}
+              className="bg-[#1E2A5E] text-white px-4 py-2 rounded hover:bg-[#16204A] transition"
+            >
+              + Add Book
+            </button>
+          )}
         </div>
       )}
 
@@ -215,7 +262,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
       {form && (
         <BookForm
-          book={editingId === "new" ? null : (form as Book)} // ✅ Fix for Add vs Edit
+          book={editingId === "new" ? null : (form as Book)}
           onSave={submit}
           onCancel={() => {
             setForm(null);
