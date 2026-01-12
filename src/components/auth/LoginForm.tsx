@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface Props {
-  onCancel: () => void; // callback to close the login modal
+  onCancel: () => void; 
 }
 
 export default function LoginForm({ onCancel }: Props) {
@@ -31,7 +31,7 @@ export default function LoginForm({ onCancel }: Props) {
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
 
-      // ✅ Login successful
+      //  Login successful
       toast.success("Login successful");
 
       const userId = result.user._id;
@@ -54,9 +54,9 @@ export default function LoginForm({ onCancel }: Props) {
       // Role-based redirect
       const role = result.user.role;
       if (role === "admin") {
-        router.push("/admin/dashboard"); // Admin
+        router.push("/admin/dashboard");  
       } else if (role === "seller" || role === "buyer") {
-        router.push("/"); // Buyer or seller homepage
+        router.push("/"); 
       }
     } catch (error: any) {
       toast.error(error || "Invalid email or password");

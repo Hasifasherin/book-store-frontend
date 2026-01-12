@@ -45,7 +45,7 @@ export default function AnalyticsCharts() {
 
         const totalUsers = (buyersRes.data.total || 0) + (sellersRes.data.total || 0);
 
-        // ---------------- BOOKS BY CATEGORY ----------------
+        //  BOOKS BY CATEGORY 
         const categoryMap: Record<string, number> = {};
         books.forEach((book: Book) => {
           const name = book.categoryName || "Uncategorized";
@@ -75,7 +75,7 @@ export default function AnalyticsCharts() {
           });
         }
 
-        // ---------------- USERS DISTRIBUTION ----------------
+        // USERS DISTRIBUTION 
         if (usersCanvasRef.current) {
           usersChart.current = new Chart(usersCanvasRef.current, {
             type: "pie",

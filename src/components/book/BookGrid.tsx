@@ -41,7 +41,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
   const { books, loading, error } = useAppSelector((state) => state.books);
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
 
-  // ✅ AUTH USER (FOR BLOCK STATUS)
+  //  AUTH USER (FOR BLOCK STATUS)
   const authUser = useAppSelector((state) => state.auth.user);
   const isSellerBlocked =
     userRole === "seller" && authUser?.isBlocked;
@@ -184,7 +184,7 @@ export default function BookGrid({ userRole }: BookGridProps) {
 
   return (
     <div className="text-black">
-      {/* 🚫 BLOCK WARNING */}
+      {/*  BLOCK WARNING */}
       {isSellerBlocked && (
         <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
           Your account has been blocked by admin. You cannot add, edit, or delete

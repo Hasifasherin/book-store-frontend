@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../AdminLayout";
 import axios from "axios";
-import { Plus } from "lucide-react"; // icon for Add button
+import { Plus } from "lucide-react"; 
 
 interface Category {
   _id: string;

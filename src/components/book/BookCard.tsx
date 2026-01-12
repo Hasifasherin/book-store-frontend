@@ -41,7 +41,7 @@ export default function BookCard({
     }
   };
 
-  // ✅ SAFE DISCOUNT CALCULATION
+  //  SAFE DISCOUNT CALCULATION
   const finalPrice =
     book.discount && book.discount > 0
       ? Math.round(book.price - (book.price * book.discount) / 100)

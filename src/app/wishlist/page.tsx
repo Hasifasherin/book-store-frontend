@@ -10,7 +10,7 @@ export default function WishlistPage() {
   const dispatch = useAppDispatch();
   const { items } = useAppSelector((state) => state.wishlist);
   
-  // ✅ Client mount check
+  //  Client mount check
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) return null; // wait until client mount

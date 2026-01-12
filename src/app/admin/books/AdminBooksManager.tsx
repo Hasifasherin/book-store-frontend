@@ -121,7 +121,7 @@ export default function AdminBooksManager() {
             setSelectedBook(null);
             setPanelMode("add");
           }}
-          onDelete={handleDelete} // pass full book object
+          onDelete={handleDelete} 
           userRole={user?.role}
           userId={user?._id}
         />
