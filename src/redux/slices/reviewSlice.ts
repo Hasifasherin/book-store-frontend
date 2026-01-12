@@ -1,6 +1,8 @@
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+
+/* ================= BASE URL ================= */
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /* ================= TYPES ================= */
 
@@ -13,7 +15,7 @@ export interface ReviewUser {
 export interface Review {
   _id: string;
   bookId: string;
-  userId: string | ReviewUser; 
+  userId: string | ReviewUser;
   rating: number;
   comment: string;
   createdAt: string;
@@ -38,11 +40,8 @@ const initialState: ReviewState = {
 export const fetchReviews = createAsyncThunk<Review[], string>(
   "reviews/fetchReviews",
   async (bookId) => {
-    const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/books/${bookId}/reviews`
-    );
+    const { data } = await axios.get(`${BASE_URL}/api/books/${bookId}/reviews`);
 
-    // backend returns { items, total, averageRating }
     if (Array.isArray(data?.items)) return data.items;
     if (Array.isArray(data)) return data;
     return [];
@@ -52,74 +51,44 @@ export const fetchReviews = createAsyncThunk<Review[], string>(
 // ================= ADD REVIEW =================
 export const addReview = createAsyncThunk<
   Review,
-  {
-    bookId: string;
-    review: {
-      rating: number;
-      comment: string;
-    };
-    token: string;
+  { bookId: string; review: { rating: number; comment: string }; token: string }
+>(
+  "reviews/addReview",
+  async ({ bookId, review, token }) => {
+    const { data } = await axios.post(`${BASE_URL}/api/books/${bookId}/reviews`, review, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data;
   }
->("reviews/addReview", async ({ bookId, review, token }) => {
-  const { data } = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/books/${bookId}/reviews`,
-    review,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return data;
-});
+);
 
 // ================= UPDATE REVIEW =================
 export const updateReview = createAsyncThunk<
   Review,
-  {
-    bookId: string;
-    reviewId: string;
-    data: {
-      rating: number;
-      comment: string;
-    };
-    token: string;
+  { bookId: string; reviewId: string; data: { rating: number; comment: string }; token: string }
+>(
+  "reviews/updateReview",
+  async ({ reviewId, data, token }) => {
+    const { data: resData } = await axios.put(`${BASE_URL}/api/books/reviews/${reviewId}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return resData;
   }
->("reviews/updateReview", async ({ reviewId, data, token }) => {
-  const res = await axios.put(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/books/reviews/${reviewId}`,
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.data;
-});
+);
 
 // ================= DELETE REVIEW =================
 export const deleteReview = createAsyncThunk<
   string,
-  {
-    bookId: string;
-    reviewId: string;
-    token: string;
+  { bookId: string; reviewId: string; token: string }
+>(
+  "reviews/deleteReview",
+  async ({ reviewId, token }) => {
+    await axios.delete(`${BASE_URL}/api/books/reviews/${reviewId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return reviewId;
   }
->("reviews/deleteReview", async ({ reviewId, token }) => {
-  await axios.delete(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/books/reviews/${reviewId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return reviewId;
-});
+);
 
 /* ================= SLICE ================= */
 
@@ -129,11 +98,8 @@ const reviewSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-
       // FETCH
-      .addCase(fetchReviews.pending, (state) => {
-        state.loading = true;
-      })
+      .addCase(fetchReviews.pending, (state) => { state.loading = true; })
       .addCase(fetchReviews.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
@@ -150,19 +116,13 @@ const reviewSlice = createSlice({
 
       // UPDATE
       .addCase(updateReview.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (r) => r._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        }
+        const index = state.items.findIndex((r) => r._id === action.payload._id);
+        if (index !== -1) state.items[index] = action.payload;
       })
 
       // DELETE
       .addCase(deleteReview.fulfilled, (state, action) => {
-        state.items = state.items.filter(
-          (r) => r._id !== action.payload
-        );
+        state.items = state.items.filter((r) => r._id !== action.payload);
       });
   },
 });

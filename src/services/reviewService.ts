@@ -1,21 +1,20 @@
 import axios from "axios";
+import { BASE_URL } from "@/utils/baseUrl";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
-// GET reviews of a book
+/* ---------------- GET REVIEWS ---------------- */
 export const getBookReviewsAPI = async (bookId: string) => {
-  const res = await axios.get(`${API}/books/${bookId}/reviews`);
+  const res = await axios.get(`${BASE_URL}/books/${bookId}/reviews`);
   return res.data;
 };
 
-// ADD review (buyer only)
+/* ---------------- ADD REVIEW ---------------- */
 export const addBookReviewAPI = async (
   bookId: string,
   review: { rating: number; comment: string },
   token: string
 ) => {
   const res = await axios.post(
-    `${API}/books/${bookId}/reviews`,
+    `${BASE_URL}/books/${bookId}/reviews`,
     review,
     {
       headers: {
@@ -23,5 +22,6 @@ export const addBookReviewAPI = async (
       },
     }
   );
+
   return res.data;
 };

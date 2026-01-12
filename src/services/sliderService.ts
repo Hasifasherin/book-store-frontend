@@ -1,37 +1,53 @@
-// services/sliderService.ts
 import axios from "axios";
-import { SliderItem } from "@/types/slider"; 
+import { SliderItem } from "@/types/slider";
+import { BASE_URL } from "@/utils/baseUrl";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/sliders";
+const SLIDER_API = `${BASE_URL}/api/sliders`;
 
-// GET all sliders
+/* ---------------- GET ALL SLIDERS ---------------- */
 export const getSliders = async (): Promise<SliderItem[]> => {
-  const res = await axios.get(API_URL);
+  const res = await axios.get(SLIDER_API);
   return res.data;
 };
 
-// CREATE a new slider (FormData)
-export const createSlider = async (formData: FormData): Promise<SliderItem> => {
+/* ---------------- CREATE SLIDER ---------------- */
+export const createSlider = async (
+  formData: FormData
+): Promise<SliderItem> => {
   const token = localStorage.getItem("token");
-  const res = await axios.post(API_URL, formData, {
-    headers: { Authorization: `Bearer ${token}` },
+
+  const res = await axios.post(SLIDER_API, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   return res.data;
 };
 
-// UPDATE an existing slider by ID
-export const updateSlider = async (id: string, formData: FormData): Promise<SliderItem> => {
+/* ---------------- UPDATE SLIDER ---------------- */
+export const updateSlider = async (
+  id: string,
+  formData: FormData
+): Promise<SliderItem> => {
   const token = localStorage.getItem("token");
-  const res = await axios.put(`${API_URL}/${id}`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
+
+  const res = await axios.put(`${SLIDER_API}/${id}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   return res.data;
 };
 
-// DELETE a slider by ID
+/* ---------------- DELETE SLIDER ---------------- */
 export const deleteSlider = async (id: string): Promise<void> => {
   const token = localStorage.getItem("token");
-  await axios.delete(`${API_URL}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+
+  await axios.delete(`${SLIDER_API}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };

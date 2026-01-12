@@ -1,16 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { Book } from "@/types/book";
+import { BASE_URL } from "@/utils/baseUrl";
 
-/* ===================== AXIOS ===================== */
+/* ===================== AXIOS INSTANCE ===================== */
 const API = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: BASE_URL,
 });
 
 API.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
@@ -31,6 +34,7 @@ const initialState: BookState = {
 };
 
 /* ===================== THUNKS ===================== */
+
 // Fetch all books
 export const fetchBooks = createAsyncThunk<Book[]>(
   "books/fetch",
@@ -91,6 +95,7 @@ const bookSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
       /* -------- FETCH ALL -------- */
       .addCase(fetchBooks.pending, (state) => {
         state.loading = true;
@@ -185,7 +190,9 @@ const bookSlice = createSlice({
 
       /* -------- DELETE -------- */
       .addCase(deleteBook.fulfilled, (state, action) => {
-        state.books = state.books.filter((book) => book._id !== action.payload);
+        state.books = state.books.filter(
+          (book) => book._id !== action.payload
+        );
       });
   },
 });

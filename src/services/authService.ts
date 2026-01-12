@@ -1,38 +1,42 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { BASE_URL } from "@/utils/baseUrl";
 
+/* ---------------- SIGNUP ---------------- */
 export const signupUserAPI = async (data: any) => {
-  try {
-    const res = await fetch(`${API_URL}/api/users/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+  const res = await fetch(`${BASE_URL}/api/users/signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-    const result = await res.json();
+  const result = await res.json();
 
-    if (!res.ok) throw new Error(result.message || "Signup failed");
-
-    return result;
-  } catch (err: any) {
-    // Add proper error propagation
-    throw new Error(err.message || "Signup failed");
+  if (!res.ok) {
+    throw new Error(result?.message || "Signup failed");
   }
+
+  return result;
 };
 
-export const loginUserAPI = async (data: { email: string; password: string }) => {
-  try {
-    const res = await fetch(`${API_URL}/api/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+/* ---------------- LOGIN ---------------- */
+export const loginUserAPI = async (data: {
+  email: string;
+  password: string;
+}) => {
+  const res = await fetch(`${BASE_URL}/api/users/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-    const result = await res.json();
+  const result = await res.json();
 
-    if (!res.ok) throw new Error(result.message || "Login failed");
-
-    return result;
-  } catch (err: any) {
-    throw new Error(err.message || "Login failed");
+  if (!res.ok) {
+    throw new Error(result?.message || "Login failed");
   }
+
+  return result;
 };
